@@ -72,22 +72,23 @@ class MPlayer : Application() {
     internal var musicSlider: Slider = Slider()
 
     fun setMusicNow(){
-        if(mplayer!!.media != musicNow?.getMedia()) {
-            mplayer?.stop()
-            mplayer = MediaPlayer(musicNow?.getMedia())
-            musicSlider.min = 0.0;
-            musicSlider.max = 100.0;
+            if(listMusic.isEmpty()) return
+
+            if(musicNow != null && (mplayer == null || mplayer!!.media != musicNow?.getMedia())) {
+                mplayer?.stop()
+                mplayer = MediaPlayer(musicNow?.getMedia())
+                musicSlider.min = 0.0
+                musicSlider.max = 100.0
+            }
+
+            if(mplayer != null) mplayer?.play()
         }
 
-        if(musicNow != null) mplayer?.play()
-    }
-
-    fun deleteMusicNow(){
-        if(musicNow?.getMedia() == mplayer?.media) {
-            mplayer?.stop()
-            mplayer = null
-            musicSlider.min = 0.0;
-            musicSlider.max = 100.0;
+        fun deleteMusicNow(){
+            if(musicNow?.getMedia() == mplayer?.media) {
+                mplayer?.stop()
+            musicSlider.min = 0.0
+            musicSlider.max = 100.0
         }
 
         listMusic.remove(musicNow)
