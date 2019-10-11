@@ -9,12 +9,11 @@
 // TODO 4)Добавить кнопки “Next” и “Prev” для переключения треков
 // TODO 5)Добавить возможность перемотки треков, нажатием на слайдер
 // TODO 6)Добавить слайдер для изменения громкости
-// TODO 7)Подгрузка музыки из папки
+// TODO 7)Подгрузка музыки из папки (Добавляет не всё, дебаг, всё плохо когда много файлов).
 
 import javafx.application.Application
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.Scene
 import javafx.scene.control.*
@@ -25,14 +24,27 @@ import javafx.scene.layout.VBox
 import javafx.scene.media.Media
 import javafx.scene.media.MediaPlayer
 import javafx.scene.text.Text
+import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.FileChooser.ExtensionFilter
 import javafx.stage.Stage
-
+import java.io.*
 import java.io.File
 
+class FolderReader(var path: String){
+    fun read() : List<String>{
+        var buffer : ArrayList<String> = arrayListOf()
+
+        File(path).walk().forEach {
+            buffer.add(it.toString())
+        }
+
+        return buffer
+    }
+}
+
 class Music(path : String, list : ObservableList<Music>){
-    private lateinit var Path : SimpleStringProperty
+    private lateinit var Name : SimpleStringProperty
     private var musicMedia : Media = Media(path)
     private var mPlayer : MediaPlayer = MediaPlayer(musicMedia)
     private lateinit var Duration : SimpleStringProperty
@@ -40,15 +52,15 @@ class Music(path : String, list : ObservableList<Music>){
     init {
         mPlayer.onReady = Runnable {
             var allTime : Double = mPlayer.stopTime.toSeconds()
-            Path = SimpleStringProperty(path.replace("%20", " "))
+            Name = SimpleStringProperty(path.replace("%20", " ").substringAfterLast('/'))
             Duration = SimpleStringProperty((allTime / 60).toInt().toString() + "." + (allTime % 60).toInt().toString())
 
             list.add(this)
         }
     }
 
-    fun getPath() : String{
-        return Path.get()
+    fun getName() : String{
+        return Name.get()
     }
 
     fun getDuration() : String{
@@ -71,22 +83,26 @@ class MPlayer : Application() {
     internal var musicTimer : Text = Text()
     internal var musicSlider: Slider = Slider()
 
+    fun addNewMusic(url:String){
+        Music(url, listMusic)
+    }
+
     fun setMusicNow(){
-            if(listMusic.isEmpty()) return
+        if(listMusic.isEmpty()) return
 
-            if(musicNow != null && (mplayer == null || mplayer!!.media != musicNow?.getMedia())) {
-                mplayer?.stop()
-                mplayer = MediaPlayer(musicNow?.getMedia())
-                musicSlider.min = 0.0
-                musicSlider.max = 100.0
-            }
-
-            if(mplayer != null) mplayer?.play()
+        if(musicNow != null && (mplayer == null || mplayer!!.media != musicNow?.getMedia())) {
+            mplayer?.stop()
+            mplayer = MediaPlayer(musicNow?.getMedia())
+            musicSlider.min = 0.0
+            musicSlider.max = 100.0
         }
 
-        fun deleteMusicNow(){
-            if(musicNow?.getMedia() == mplayer?.media) {
-                mplayer?.stop()
+        if(mplayer != null) mplayer?.play()
+    }
+
+    fun deleteMusicNow(){
+        if(musicNow?.getMedia() == mplayer?.media) {
+            mplayer?.stop()
             musicSlider.min = 0.0
             musicSlider.max = 100.0
         }
@@ -104,6 +120,9 @@ class MPlayer : Application() {
                 fileChooser.extensionFilters.addAll(
                     ExtensionFilter("Audio Files", "*.wav", "*.mp3")
                 )
+
+                val folderChooser = DirectoryChooser()
+                folderChooser.title = "Open Folder"
 
                 val vbox = object : VBox() {
                     init {
@@ -141,14 +160,14 @@ class MPlayer : Application() {
 
                         musicSelectionModel.selectedItemProperty().addListener { changed, oldValue, newValue ->
                             musicNow = newValue
-                            println(musicNow)
+                            println(musicNow?.getName())
                         }
 
                         children.add(Label("Playlist"))
 
-                        var pathColumn : TableColumn<Music, String> = TableColumn("Path")
+                        var pathColumn : TableColumn<Music, String> = TableColumn("Name")
                         pathColumn.minWidth = 350.0
-                        pathColumn.cellValueFactory = PropertyValueFactory<Music, String>("Path")
+                        pathColumn.cellValueFactory = PropertyValueFactory<Music, String>("Name")
                         tableViewMusic.columns.add(pathColumn)
 
                         var durationColumn : TableColumn<Music, String> = TableColumn("Duration")
@@ -172,23 +191,38 @@ class MPlayer : Application() {
                     init {
                         val menu = object : Menu("File") {
                             init {
-                                val selectMenuItem = object : MenuItem("Add media") {
+                                val addMediaButton = object : MenuItem("Add media") {
                                     init {
-                                        setOnAction { e ->
+                                        setOnAction {
                                             selectedFile = fileChooser.showOpenDialog(primaryStage)
                                             if (selectedFile != null) {
                                                 var url = selectedFile!!.toURI()
                                                 println(url.toString())
-                                                Music(url.toString(), listMusic)
+                                                addNewMusic(url.toString())
                                             }
                                         }
                                     }
                                 }
-                                val pauseMenuItem = MenuItem("Pause")
-                                val playMenuItem = MenuItem("Play")
-                                val stopMenuItem = MenuItem("Stop")
+                                val addMediaFromFolderButton = object  : MenuItem("Add from folder"){
+                                    init{
+                                        setOnAction {
+                                            selectedFile = folderChooser.showDialog(primaryStage)
+                                            if (selectedFile != null) {
+                                                var uri = selectedFile!!.toURI().toString()
+                                                var reader = FolderReader(uri.substringAfter('/'))
+                                                var buffer = reader.read()
+                                                buffer.forEach {
+                                                    var expansion =  it.substringAfterLast('.')
+                                                    if(expansion == "mp3" || expansion == "wav"){
+                                                        addNewMusic(uri + it.substringAfterLast('\\').replace(" ", "%20"))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
 
-                                items.addAll(selectMenuItem, playMenuItem, pauseMenuItem, stopMenuItem)
+                                items.addAll(addMediaButton, addMediaFromFolderButton)
                             }
                         }
                         menus.add(menu)
@@ -211,11 +245,12 @@ class MPlayer : Application() {
             while (true) {
                 if (mplayer != null) {
                     val currentTime = mplayer?.currentTime!!.toSeconds()
-                    val allTime =  mplayer?.stopTime!!.toSeconds()
+
+                    var allTime =  mplayer?.stopTime!!.toSeconds()
 
                     var timeNow = currentTime * 100.0 / allTime
 
-                    musicTimer.text = (currentTime / 60).toInt().toString() + "." + (currentTime % 60).toInt().toString() + " / " + (allTime / 60).toInt().toString() + "." + (allTime % 60).toInt().toString()
+                    musicTimer.text = (currentTime / 60).toInt().toString() + "." + (currentTime % 60).toInt().toString() + " / " + musicNow?.getDuration() + " ~ " + musicNow?.getName()
 
                     musicSlider.value = timeNow
                     println("Cur time " + timeNow)
