@@ -9,105 +9,91 @@
 // TODO 4)Добавить кнопки “Next” и “Prev” для переключения треков
 // TODO 5)Добавить возможность перемотки треков, нажатием на слайдер
 // TODO 6)Добавить слайдер для изменения громкости
-// TODO 7)Подгрузка музыки из папки (Добавляет не всё, дебаг, всё плохо когда много файлов).
+// 7)Подгрузка музыки из папки (Эта сука не вмещает больше 63 треков).
+// TODO 8)Вынести в отдельные функции добавление одной песни и папки с песнями.
 
 import javafx.application.Application
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
-import javafx.scene.media.Media
 import javafx.scene.media.MediaPlayer
 import javafx.scene.text.Text
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.FileChooser.ExtensionFilter
 import javafx.stage.Stage
-import java.io.*
 import java.io.File
-
-class FolderReader(var path: String){
-    fun read() : List<String>{
-        var buffer : ArrayList<String> = arrayListOf()
-
-        File(path).walk().forEach {
-            buffer.add(it.toString())
-        }
-
-        return buffer
-    }
-}
-
-class Music(path : String, list : ObservableList<Music>){
-    private lateinit var Name : SimpleStringProperty
-    private var musicMedia : Media = Media(path)
-    private var mPlayer : MediaPlayer = MediaPlayer(musicMedia)
-    private lateinit var Duration : SimpleStringProperty
-
-    init {
-        mPlayer.onReady = Runnable {
-            var allTime : Double = mPlayer.stopTime.toSeconds()
-            Name = SimpleStringProperty(path.replace("%20", " ").substringAfterLast('/'))
-            Duration = SimpleStringProperty((allTime / 60).toInt().toString() + "." + (allTime % 60).toInt().toString())
-
-            list.add(this)
-        }
-    }
-
-    fun getName() : String{
-        return Name.get()
-    }
-
-    fun getDuration() : String{
-        return Duration.get()
-    }
-
-    fun getMedia() : Media{
-        return musicMedia
-    }
-}
 
 class MPlayer : Application() {
     internal var musicNow : Music? = null
-    internal var listMusic : ObservableList<Music> = FXCollections.observableArrayList()
-    internal var tableViewMusic : TableView<Music> = TableView(listMusic)
+    internal var observableList : ObservableList<Music> = FXCollections.observableArrayList()
+    internal var tableViewMusic : TableView<Music> = TableView(observableList)
 
     internal var selectedFile: File? = null
     internal var mplayer: MediaPlayer? = null
+    private var checkDurationMediaPlayer : MediaPlayer? = null
 
     internal var musicTimer : Text = Text()
     internal var musicSlider: Slider = Slider()
 
-    fun addNewMusic(url:String){
-        Music(url, listMusic)
+    fun addNewMusic(url:String) : Music{
+        var music = Music(url)
+        observableList.add(music)
+        return music
+    }
+
+    fun checkMusicDuration(musics: ArrayList<Music>){
+        if(musics.isNotEmpty()){
+            var music = musics.first()
+            checkDurationMediaPlayer = MediaPlayer(music.getMedia())
+
+            checkDurationMediaPlayer!!.onReady = Runnable {
+                music.setDuration(checkDurationMediaPlayer!!.cycleDuration.toString())
+                musics.remove(music)
+                checkDurationMediaPlayer!!.dispose()
+                checkMusicDuration(musics)
+            }
+        }
     }
 
     fun setMusicNow(){
-        if(listMusic.isEmpty()) return
-
-        if(musicNow != null && (mplayer == null || mplayer!!.media != musicNow?.getMedia())) {
-            mplayer?.stop()
-            mplayer = MediaPlayer(musicNow?.getMedia())
-            musicSlider.min = 0.0
-            musicSlider.max = 100.0
+        if(observableList.isEmpty()){
+            return
         }
 
-        if(mplayer != null) mplayer?.play()
+        if(musicNow != null && mplayer?.media != musicNow?.getMedia()) {
+            mplayer?.stop()
+            mplayer = MediaPlayer(musicNow?.getMedia())
+            musicSlider.value = 0.0
+        }
+
+        mplayer?.play()
     }
 
     fun deleteMusicNow(){
-        if(musicNow?.getMedia() == mplayer?.media) {
+        if(mplayer?.media == musicNow?.getMedia()) {
             mplayer?.stop()
-            musicSlider.min = 0.0
-            musicSlider.max = 100.0
+            mplayer?.dispose()
+            mplayer = null
+            musicSlider.value = 0.0
         }
 
-        listMusic.remove(musicNow)
+        observableList.remove(musicNow)
+    }
+
+    fun getImage(path:String) : ImageView{
+        val input = javaClass.getResourceAsStream(path)
+        val image = Image(input)
+        val imageView = ImageView(image)
+
+        return imageView
     }
 
     @Throws(Exception::class)
@@ -129,28 +115,39 @@ class MPlayer : Application() {
                         children.add(filenameLabel)
                         val hbox = object : HBox() {
                             init {
-                                val playButton = Button("Play")
-                                val pauseButton = Button("Pause")
 
-                                playButton.setOnAction { e ->
-                                    setMusicNow()
+                                val playButton = object : Button("", getImage("resources/images/play.png")){
+                                    init {
+                                        setOnAction {
+                                            setMusicNow()
+                                        }
+                                    }
                                 }
 
-                                pauseButton.setOnAction { e -> mplayer?.pause() }
-
-                                val stopButton = object : Button("Stop") {
+                                val pauseButton = object : Button("", getImage("resources/images/pause1.png")){
                                     init {
-                                        setOnAction { e -> mplayer?.stop() }
+                                        setOnAction {
+                                            mplayer?.pause()
+                                        }
+                                    }
+                                }
+
+                                val stopButton = object : Button("", getImage("resources/images/stop1.png")) {
+                                    init {
+                                        setOnAction {
+                                            mplayer?.stop()
+                                        }
                                     }
                                 }
 
                                 val deleteButton = object : Button("Delete"){
                                     init {
-                                        setOnAction { e ->
+                                        setOnAction {
                                             deleteMusicNow()
                                         }
                                     }
                                 }
+
                                 children.addAll(playButton, pauseButton, stopButton, deleteButton)
                             }
                         }
@@ -179,9 +176,6 @@ class MPlayer : Application() {
                                 setMusicNow()
                             }
                         }
-
-                        tableViewMusic.rowFactory
-
                         children.add(tableViewMusic)
                     }
                 }
@@ -198,7 +192,9 @@ class MPlayer : Application() {
                                             if (selectedFile != null) {
                                                 var url = selectedFile!!.toURI()
                                                 println(url.toString())
-                                                addNewMusic(url.toString())
+                                                var listNewMusic : ArrayList<Music> = arrayListOf()
+                                                listNewMusic.add(addNewMusic(url.toString()))
+                                                checkMusicDuration(listNewMusic)
                                             }
                                         }
                                     }
@@ -209,19 +205,20 @@ class MPlayer : Application() {
                                             selectedFile = folderChooser.showDialog(primaryStage)
                                             if (selectedFile != null) {
                                                 var uri = selectedFile!!.toURI().toString()
-                                                var reader = FolderReader(uri.substringAfter('/'))
-                                                var buffer = reader.read()
-                                                buffer.forEach {
+                                                var paths = FolderReader(uri.substringAfter('/')).read()
+                                                var listNewMusic : ArrayList<Music> = arrayListOf()
+
+                                                paths.forEach {
                                                     var expansion =  it.substringAfterLast('.')
                                                     if(expansion == "mp3" || expansion == "wav"){
-                                                        addNewMusic(uri + it.substringAfterLast('\\').replace(" ", "%20"))
+                                                         listNewMusic.add(addNewMusic((uri + it.substringAfterLast('\\')).replace(" ", "%20")))
                                                     }
                                                 }
+                                                checkMusicDuration(listNewMusic)
                                             }
                                         }
                                     }
                                 }
-
                                 items.addAll(addMediaButton, addMediaFromFolderButton)
                             }
                         }
@@ -257,6 +254,7 @@ class MPlayer : Application() {
                 }
                 try {
                     Thread.sleep(900)
+                    tableViewMusic.refresh()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
