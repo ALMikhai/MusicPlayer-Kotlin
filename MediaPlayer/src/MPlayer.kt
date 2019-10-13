@@ -7,14 +7,17 @@
 // -По двойному клику на файл из списка должно начаться воспроизведение выбранного трека
 // TODO -Трек который играет должен визуально отличаться в списке
 // TODO 4)Добавить кнопки “Next” и “Prev” для переключения треков
-// TODO 5)Добавить возможность перемотки треков, нажатием на слайдер
+// 5)Добавить возможность перемотки треков, нажатием на слайдер
 // TODO 6)Добавить слайдер для изменения громкости
-// 7)Подгрузка музыки из папки (Эта сука не вмещает больше 63 треков).
+// 7)Подгрузка музыки из папки.
 // TODO 8)Вынести в отдельные функции добавление одной песни и папки с песнями.
 
 import javafx.application.Application
+import javafx.beans.value.ChangeListener
+import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
@@ -23,21 +26,24 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.scene.media.MediaException
 import javafx.scene.media.MediaPlayer
 import javafx.scene.text.Text
 import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.FileChooser.ExtensionFilter
 import javafx.stage.Stage
+import javafx.util.Duration
 import java.io.File
 
 class MPlayer : Application() {
-    internal var musicNow : Music? = null
+    internal var musicPlaying : Music? = null
+    internal var musicSelected : Music? = null
     internal var observableList : ObservableList<Music> = FXCollections.observableArrayList()
     internal var tableViewMusic : TableView<Music> = TableView(observableList)
 
     internal var selectedFile: File? = null
-    internal var mplayer: MediaPlayer? = null
+    internal var mPlayer: MediaPlayer? = null
     private var checkDurationMediaPlayer : MediaPlayer? = null
 
     internal var musicTimer : Text = Text()
@@ -55,7 +61,8 @@ class MPlayer : Application() {
             checkDurationMediaPlayer = MediaPlayer(music.getMedia())
 
             checkDurationMediaPlayer!!.onReady = Runnable {
-                music.setDuration(checkDurationMediaPlayer!!.cycleDuration.toString())
+                var duration = checkDurationMediaPlayer!!.stopTime.toSeconds()
+                music.setDuration((duration / 60).toInt().toString() + '.' + (duration % 60).toInt().toString())
                 musics.remove(music)
                 checkDurationMediaPlayer!!.dispose()
                 checkMusicDuration(musics)
@@ -68,32 +75,44 @@ class MPlayer : Application() {
             return
         }
 
-        if(musicNow != null && mplayer?.media != musicNow?.getMedia()) {
-            mplayer?.stop()
-            mplayer = MediaPlayer(musicNow?.getMedia())
+        if(musicSelected != null && (musicPlaying != musicSelected || musicPlaying == null)){ //mplayer?.media != musicSelected?.getMedia()) {
+            mPlayer?.stop()
+            mPlayer?.dispose()
+            mPlayer = MediaPlayer(musicSelected?.getMedia())
+            musicPlaying = musicSelected
             musicSlider.value = 0.0
         }
 
-        mplayer?.play()
+        mPlayer?.play()
     }
 
     fun deleteMusicNow(){
-        if(mplayer?.media == musicNow?.getMedia()) {
-            mplayer?.stop()
-            mplayer?.dispose()
-            mplayer = null
+        if(mPlayer?.media == musicSelected?.getMedia()) {
+            mPlayer?.stop()
+            mPlayer?.dispose()
+            mPlayer = null
             musicSlider.value = 0.0
         }
 
-        observableList.remove(musicNow)
+        observableList.remove(musicSelected)
     }
 
     fun getImage(path:String) : ImageView{
         val input = javaClass.getResourceAsStream(path)
         val image = Image(input)
-        val imageView = ImageView(image)
 
-        return imageView
+        return ImageView(image)
+    }
+
+    fun updateSlider(){
+        if(mPlayer != null){
+            try{
+                println(musicSlider.value)
+                mPlayer!!.seek(Duration((mPlayer!!.stopTime.toMillis() / 100 * musicSlider.value)))
+            }catch (e : MediaException){
+                e.printStackTrace()
+            }
+        }
     }
 
     @Throws(Exception::class)
@@ -127,7 +146,7 @@ class MPlayer : Application() {
                                 val pauseButton = object : Button("", getImage("resources/images/pause1.png")){
                                     init {
                                         setOnAction {
-                                            mplayer?.pause()
+                                            mPlayer?.pause()
                                         }
                                     }
                                 }
@@ -135,7 +154,7 @@ class MPlayer : Application() {
                                 val stopButton = object : Button("", getImage("resources/images/stop1.png")) {
                                     init {
                                         setOnAction {
-                                            mplayer?.stop()
+                                            mPlayer?.stop()
                                         }
                                     }
                                 }
@@ -156,14 +175,14 @@ class MPlayer : Application() {
                         val musicSelectionModel = tableViewMusic.selectionModel
 
                         musicSelectionModel.selectedItemProperty().addListener { changed, oldValue, newValue ->
-                            musicNow = newValue
-                            println(musicNow?.getName())
+                            musicSelected = newValue
+                            println(musicSelected?.getName())
                         }
 
                         children.add(Label("Playlist"))
 
                         var pathColumn : TableColumn<Music, String> = TableColumn("Name")
-                        pathColumn.minWidth = 350.0
+                        pathColumn.minWidth = 450.0
                         pathColumn.cellValueFactory = PropertyValueFactory<Music, String>("Name")
                         tableViewMusic.columns.add(pathColumn)
 
@@ -227,6 +246,22 @@ class MPlayer : Application() {
                 }
                 top = menubar
 
+                musicSlider.onMouseClicked = EventHandler {
+                    updateSlider()
+                }
+
+//                musicSlider.valueProperty().addListener { observableValue: ObservableValue<out Number>, oldVal: Number, newVal: Number ->
+//                    if(mPlayer != null){
+//                        try{
+//                            mPlayer!!.stop()
+//                            mPlayer!!.startTime = Duration((mPlayer!!.stopTime.toMillis() / 100 * newVal.toDouble()))
+//                            mPlayer!!.play()
+//                        }catch (e : MediaException){
+//                            e.printStackTrace()
+//                        }
+//                    }
+//                }
+
                 val sliderBox = object : VBox() {
                     init {
                         children.add(musicTimer)
@@ -240,14 +275,14 @@ class MPlayer : Application() {
 
         Thread(Runnable {
             while (true) {
-                if (mplayer != null) {
-                    val currentTime = mplayer?.currentTime!!.toSeconds()
+                if (mPlayer != null) {
+                    val currentTime = mPlayer?.currentTime!!.toSeconds()
 
-                    var allTime =  mplayer?.stopTime!!.toSeconds()
+                    var allTime =  mPlayer?.stopTime!!.toSeconds()
 
                     var timeNow = currentTime * 100.0 / allTime
 
-                    musicTimer.text = (currentTime / 60).toInt().toString() + "." + (currentTime % 60).toInt().toString() + " / " + musicNow?.getDuration() + " ~ " + musicNow?.getName()
+                    musicTimer.text = (currentTime / 60).toInt().toString() + "." + (currentTime % 60).toInt().toString() + " / " + musicPlaying?.getDuration() + " ~ " + musicPlaying?.getName()
 
                     musicSlider.value = timeNow
                     println("Cur time " + timeNow)
@@ -261,7 +296,7 @@ class MPlayer : Application() {
             }
         }).start()
 
-        val scene = Scene(root, 500.0, 700.0)
+        val scene = Scene(root, 550.0, 700.0)
 
         primaryStage.scene = scene
         primaryStage.show()
