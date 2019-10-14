@@ -6,11 +6,13 @@
 // -3 столбец - длина файла в секундах
 // -По двойному клику на файл из списка должно начаться воспроизведение выбранного трека
 // -Трек который играет должен визуально отличаться в списке
-// TODO 4)Добавить кнопки “Next” и “Prev” для переключения треков
+// 4)Добавить кнопки “Next” и “Prev” для переключения треков
 // 5)Добавить возможность перемотки треков, нажатием на слайдер
 // 6)Добавить слайдер для изменения громкости
 // 7)Подгрузка музыки из папки.
-// TODO 8)Вынести в отдельные функции добавление одной песни и папки с песнями.
+// TODO 8)Вынести в отдельные функции добавление одной песни и папки с песнями(рефакторинг всего кода).
+// TODO 9) Сделать удаление на кнопку delete.
+// TODO 10) Сохранение плей-листа и подгрузка при след. запуске.
 
 import javafx.application.Application
 import javafx.collections.FXCollections
@@ -79,15 +81,33 @@ class MPlayer : Application() {
             return
         }
 
-        if(musicSelected != null && (musicPlaying != musicSelected || musicPlaying == null)){ //mplayer?.media != musicSelected?.getMedia()) {
+        if(musicSelected != null && (musicPlaying != musicSelected || musicPlaying == null)){
             mPlayer?.stop()
             mPlayer?.dispose()
             mPlayer = MediaPlayer(musicSelected?.getMedia())
+            musicSelected!!.setName("-> " + musicSelected!!.getName())
+            if(musicPlaying != null) musicPlaying!!.setName(musicPlaying!!.getName().substringAfter(' '))
             musicPlaying = musicSelected
             musicSlider.value = 0.0
         }
 
         mPlayer?.play()
+    }
+
+    fun setNextMusic(){
+        if(mPlayer == null) return
+        musicSelected = observableList[(observableList.indexOf(musicPlaying) + 1) % observableList.count()]
+        setMusicNow()
+    }
+
+    fun setPrevMusic(){
+        if(mPlayer == null) return
+        musicSelected = if(observableList.indexOf(musicPlaying) == 0)
+            observableList[observableList.count() - 1]
+        else
+            observableList[(observableList.indexOf(musicPlaying) - 1)]
+
+        setMusicNow()
     }
 
     fun deleteMusicNow(){
@@ -147,7 +167,7 @@ class MPlayer : Application() {
                                     }
                                 }
 
-                                val pauseButton = object : Button("", getImage("resources/images/pause1.png")){
+                                val pauseButton = object : Button("", getImage("resources/images/pause.png")){
                                     init {
                                         setOnAction {
                                             mPlayer?.pause()
@@ -155,7 +175,7 @@ class MPlayer : Application() {
                                     }
                                 }
 
-                                val stopButton = object : Button("", getImage("resources/images/stop1.png")) {
+                                val stopButton = object : Button("", getImage("resources/images/stop.png")) {
                                     init {
                                         setOnAction {
                                             mPlayer?.stop()
@@ -171,7 +191,23 @@ class MPlayer : Application() {
                                     }
                                 }
 
-                                children.addAll(playButton, pauseButton, stopButton, deleteButton)
+                                val nextButton = object : Button("", getImage("resources/images/next.png")){
+                                    init {
+                                        setOnAction {
+                                            setNextMusic()
+                                        }
+                                    }
+                                }
+
+                                val prevButton = object : Button("", getImage("resources/images/prev.png")){
+                                    init {
+                                        setOnAction {
+                                            setPrevMusic()
+                                        }
+                                    }
+                                }
+
+                                children.addAll(prevButton, playButton, pauseButton, nextButton, stopButton, deleteButton)
                             }
                         }
                         children.add(hbox)
@@ -256,7 +292,7 @@ class MPlayer : Application() {
                             updateSlider()
                         }
 
-                        maxWidth = windowWidth
+                        minWidth = windowWidth
                     }
                 }
 
@@ -274,6 +310,10 @@ class MPlayer : Application() {
                                         minHeight = 40.0
 
                                         orientation = Orientation.VERTICAL
+
+                                        isShowTickMarks = true
+                                        isShowTickLabels = true
+                                        majorTickUnit = 0.25
 
                                         onMouseDragged = EventHandler {
                                             mPlayer?.volume  = volumeSlider.value
@@ -297,20 +337,29 @@ class MPlayer : Application() {
         Thread(Runnable {
             while (true) {
                 if (mPlayer != null) {
-                    val currentTime = mPlayer?.currentTime!!.toSeconds()
+                    try {
+                        val currentTime = mPlayer?.currentTime!!.toSeconds()
 
-                    var allTime =  mPlayer?.stopTime!!.toSeconds()
+                        var allTime = mPlayer?.stopTime!!.toSeconds()
 
-                    var timeNow = currentTime * 100.0 / allTime
+                        var timeNow = currentTime * 100.0 / allTime
 
-                    musicTimer.text = (currentTime / 60).toInt().toString() + "." + (currentTime % 60).toInt().toString() + " / " + musicPlaying?.getDuration() + " ~ " + musicPlaying?.getName()
+                        musicTimer.text =
+                            (currentTime / 60).toInt().toString() + "." + (currentTime % 60).toInt().toString() + " / " + musicPlaying?.getDuration() + " " + musicPlaying?.getName()
 
-                    musicSlider.value = timeNow
-                    volumeSlider.value = mPlayer!!.volume
-                    println("Cur time " + timeNow)
+                        musicSlider.value = timeNow
+                        volumeSlider.value = mPlayer!!.volume
+                        println("Cur time " + timeNow)
+                    }catch (e : MediaException){
+                        mPlayer?.dispose()
+                        mPlayer = null
+                    }
+                }else{
+                    musicTimer.text = ""
                 }
+
                 try {
-                    Thread.sleep(900)
+                    Thread.sleep(1000)
                     tableViewMusic.refresh()
                 } catch (e: InterruptedException) {
                     e.printStackTrace()

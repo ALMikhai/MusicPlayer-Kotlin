@@ -10,7 +10,6 @@ class Music(path: String){
     private lateinit var _musicMedia : Media
     private lateinit var _name : SimpleStringProperty
     private lateinit var _duration : SimpleStringProperty
-    private var _isLoaded = false
 
     init {
         try {
@@ -24,6 +23,10 @@ class Music(path: String){
 
     fun getName() : String{
         return _name.get()
+    }
+
+    fun setName(name : String){
+        _name = SimpleStringProperty(name)
     }
 
     fun getDuration() : String{
