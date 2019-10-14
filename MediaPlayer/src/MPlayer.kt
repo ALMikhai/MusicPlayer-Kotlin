@@ -5,19 +5,19 @@
 // -2 столбец - название файла
 // -3 столбец - длина файла в секундах
 // -По двойному клику на файл из списка должно начаться воспроизведение выбранного трека
-// TODO -Трек который играет должен визуально отличаться в списке
+// -Трек который играет должен визуально отличаться в списке
 // TODO 4)Добавить кнопки “Next” и “Prev” для переключения треков
 // 5)Добавить возможность перемотки треков, нажатием на слайдер
-// TODO 6)Добавить слайдер для изменения громкости
+// 6)Добавить слайдер для изменения громкости
 // 7)Подгрузка музыки из папки.
 // TODO 8)Вынести в отдельные функции добавление одной песни и папки с песнями.
 
 import javafx.application.Application
-import javafx.beans.value.ChangeListener
-import javafx.beans.value.ObservableValue
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.EventHandler
+import javafx.geometry.Orientation
+import javafx.geometry.Pos
 import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
@@ -37,6 +37,9 @@ import javafx.util.Duration
 import java.io.File
 
 class MPlayer : Application() {
+    internal var windowHeight = 700.0
+    internal var windowWidth = 550.0
+
     internal var musicPlaying : Music? = null
     internal var musicSelected : Music? = null
     internal var observableList : ObservableList<Music> = FXCollections.observableArrayList()
@@ -47,7 +50,8 @@ class MPlayer : Application() {
     private var checkDurationMediaPlayer : MediaPlayer? = null
 
     internal var musicTimer : Text = Text()
-    internal var musicSlider: Slider = Slider()
+    internal lateinit var musicSlider: Slider
+    internal lateinit var volumeSlider : Slider
 
     fun addNewMusic(url:String) : Music{
         var music = Music(url)
@@ -246,25 +250,42 @@ class MPlayer : Application() {
                 }
                 top = menubar
 
-                musicSlider.onMouseClicked = EventHandler {
-                    updateSlider()
-                }
+                musicSlider = object : Slider(){
+                    init {
+                        onMouseClicked = EventHandler {
+                            updateSlider()
+                        }
 
-//                musicSlider.valueProperty().addListener { observableValue: ObservableValue<out Number>, oldVal: Number, newVal: Number ->
-//                    if(mPlayer != null){
-//                        try{
-//                            mPlayer!!.stop()
-//                            mPlayer!!.startTime = Duration((mPlayer!!.stopTime.toMillis() / 100 * newVal.toDouble()))
-//                            mPlayer!!.play()
-//                        }catch (e : MediaException){
-//                            e.printStackTrace()
-//                        }
-//                    }
-//                }
+                        maxWidth = windowWidth
+                    }
+                }
 
                 val sliderBox = object : VBox() {
                     init {
-                        children.add(musicTimer)
+                        val volumeAndName = object :  HBox() {
+                            init {
+                                alignment = Pos.BOTTOM_LEFT
+
+                                volumeSlider = object : Slider(){
+                                    init {
+                                        min = 0.0
+                                        max = 1.0
+
+                                        minHeight = 40.0
+
+                                        orientation = Orientation.VERTICAL
+
+                                        onMouseDragged = EventHandler {
+                                            mPlayer?.volume  = volumeSlider.value
+                                        }
+                                    }
+                                }
+                                children.add(volumeSlider)
+                                children.add(musicTimer)
+                            }
+                        }
+
+                        children.add(volumeAndName)
                         children.add(musicSlider)
                     }
                 }
@@ -285,6 +306,7 @@ class MPlayer : Application() {
                     musicTimer.text = (currentTime / 60).toInt().toString() + "." + (currentTime % 60).toInt().toString() + " / " + musicPlaying?.getDuration() + " ~ " + musicPlaying?.getName()
 
                     musicSlider.value = timeNow
+                    volumeSlider.value = mPlayer!!.volume
                     println("Cur time " + timeNow)
                 }
                 try {
@@ -296,7 +318,7 @@ class MPlayer : Application() {
             }
         }).start()
 
-        val scene = Scene(root, 550.0, 700.0)
+        val scene = Scene(root, windowWidth, windowHeight)
 
         primaryStage.scene = scene
         primaryStage.show()
