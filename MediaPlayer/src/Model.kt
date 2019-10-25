@@ -56,6 +56,22 @@ open class Model() {
         }
     }
 
+    fun fromPathsToMusics(uri : String, musicsPaths : ArrayList<String>, listNewMusic: ArrayList<Music>){
+        if(musicsPaths.isEmpty()){
+            return
+        }
+
+        var path = musicsPaths.first()
+        var expansion =  path.substringAfterLast('.')
+        var newMusic : Music
+        if(expansion == "mp3" || expansion == "wav") {
+            newMusic = addNewMusic((uri + path.substringAfterLast('\\')).replace(" ", "%20"))
+            listNewMusic.add(newMusic)
+        }
+        musicsPaths.remove(path)
+        fromPathsToMusics(uri, musicsPaths, listNewMusic)
+    }
+
     fun setMusicNow(){
         if(observableList.isEmpty()){
             return

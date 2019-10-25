@@ -20,17 +20,14 @@ class Controller(private var model: Model, primaryStage: Stage) {
     var addNewFolderEvent = EventHandler<ActionEvent>(){
         model.selectedFile = model.folderChooser.showDialog(primaryStage)
         if (model.selectedFile != null) {
-            var uri = model.selectedFile!!.toURI().toString()
-            var paths = FolderReader(uri.substringAfter('/').replace("%20", " ")).read()
-            var listNewMusic : ArrayList<Music> = arrayListOf()
+            Thread {
+                var uri = model.selectedFile!!.toURI().toString()
+                var paths = FolderReader(uri.substringAfter('/').replace("%20", " ")).read()
+                var listNewMusic: ArrayList<Music> = arrayListOf()
 
-            paths.forEach {
-                var expansion =  it.substringAfterLast('.')
-                if(expansion == "mp3" || expansion == "wav"){
-                    listNewMusic.add(model.addNewMusic((uri + it.substringAfterLast('\\')).replace(" ", "%20")))
-                }
-            }
-            model.checkMusicDuration(listNewMusic)
+                model.fromPathsToMusics(uri, paths, listNewMusic)
+                model.checkMusicDuration(listNewMusic)
+            }.start()
         }
     }
 

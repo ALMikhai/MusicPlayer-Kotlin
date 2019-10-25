@@ -41,6 +41,8 @@ class View() : Model() {
             }
         }
 
+        Controller.installControl(this)
+
         Thread(Runnable {
             while (true) {
                 if (mPlayer != null) {
@@ -56,7 +58,7 @@ class View() : Model() {
 
                         musicSlider.value = timeNow
                         volumeSlider.value = mPlayer!!.volume
-                        println("Cur time " + timeNow)
+                        println("Cur time $timeNow")
                     }catch (e : MediaException){
                         mPlayer?.dispose()
                         mPlayer = null
@@ -72,12 +74,9 @@ class View() : Model() {
                     e.printStackTrace()
                 }
             }
-        }).start()
-
-        Controller.installControl(this)
+        }).start() // TODO вынести в отдельный класс(типо главный поток).
 
         val scene = Scene(root, windowWidth, windowHeight)
-
         primaryStage.scene = scene
         primaryStage.show()
     }
