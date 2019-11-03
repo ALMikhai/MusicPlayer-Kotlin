@@ -1,10 +1,10 @@
-import UI.SlidersGeneration
 import UI.MusicTableGeneration
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.scene.control.Label
+import javafx.scene.control.Slider
 import javafx.scene.control.TableView
-import javafx.scene.image.Image
-import javafx.scene.image.ImageView
+import javafx.scene.layout.VBox
 import javafx.scene.media.MediaException
 import javafx.scene.media.MediaPlayer
 import javafx.scene.text.Text
@@ -15,118 +15,22 @@ import javafx.util.Duration
 import java.io.File
 
 open class Model() {
-    internal var primaryStage = Stage()
-    internal var controller = Controller(this, primaryStage)
+    protected var primaryStage = Stage()
 
-    internal var musicPlaying : Music? = null
+    protected var musicPlaying : Music? = null
+    protected var selectedFile: File? = null
+    protected var mPlayer: MediaPlayer? = null
+    protected var checkDurationMediaPlayer : MediaPlayer? = null
     internal var musicSelected : Music? = null
     internal var observableList : ObservableList<Music> = FXCollections.observableArrayList()
-    internal var selectedFile: File? = null
-    internal var mPlayer: MediaPlayer? = null
-    private var checkDurationMediaPlayer : MediaPlayer? = null
 
-    val fileChooser = FileChooser()
-    val folderChooser = DirectoryChooser()
+    protected val fileChooser = FileChooser()
+    protected val folderChooser = DirectoryChooser()
 
-    internal var windowHeight = 800.0
-    internal var windowWidth = 600.0
-    internal var tableViewMusic : TableView<Music> = MusicTableGeneration.init(observableList)
-    internal var musicTimer : Text = Text()
-    internal var musicSlider = SlidersGeneration.musicSlider(this)
-    internal var volumeSlider = SlidersGeneration.volumeSlider(this)
-
-    fun addNewMusic(url:String) : Music{
-        var music = Music(url)
-        observableList.add(music)
-        return music
-    }
-
-    fun checkMusicDuration(musics: ArrayList<Music>){
-        if(musics.isNotEmpty()){
-            var music = musics.first()
-            checkDurationMediaPlayer = MediaPlayer(music.getMedia())
-
-            checkDurationMediaPlayer!!.onReady = Runnable {
-                var duration = checkDurationMediaPlayer!!.stopTime.toSeconds()
-                music.setDuration((duration / 60).toInt().toString() + '.' + (duration % 60).toInt().toString())
-                musics.remove(music)
-                checkDurationMediaPlayer!!.dispose()
-                checkMusicDuration(musics)
-            }
-        }
-    }
-
-    fun fromPathsToMusics(uri : String, musicsPaths : ArrayList<String>, listNewMusic: ArrayList<Music>){
-        if(musicsPaths.isEmpty()){
-            return
-        }
-
-        var path = musicsPaths.first()
-        var expansion =  path.substringAfterLast('.')
-        var newMusic : Music
-        if(expansion == "mp3" || expansion == "wav") {
-            newMusic = addNewMusic((uri + path.substringAfterLast('\\')).replace(" ", "%20"))
-            listNewMusic.add(newMusic)
-        }
-        musicsPaths.remove(path)
-        fromPathsToMusics(uri, musicsPaths, listNewMusic)
-    }
-
-    fun setMusicNow(){
-        if(observableList.isEmpty()){
-            return
-        }
-
-        if(musicSelected != null && (musicPlaying != musicSelected || musicPlaying == null)){
-            mPlayer?.stop()
-            mPlayer?.dispose()
-            mPlayer = MediaPlayer(musicSelected?.getMedia())
-            musicSelected!!.setName("-> " + musicSelected!!.getName())
-            if(musicPlaying != null) musicPlaying!!.setName(musicPlaying!!.getName().substringAfter(' '))
-            musicPlaying = musicSelected
-            musicSlider.value = 0.0
-        }
-
-        mPlayer?.play()
-    }
-
-    fun setNextMusic(){
-        if(mPlayer == null) return
-        musicSelected = observableList[(observableList.indexOf(musicPlaying) + 1) % observableList.count()]
-        setMusicNow()
-    }
-
-    fun setPrevMusic(){
-        if(mPlayer == null) return
-        musicSelected = if(observableList.indexOf(musicPlaying) == 0)
-            observableList[observableList.count() - 1]
-        else
-            observableList[(observableList.indexOf(musicPlaying) - 1)]
-
-        setMusicNow()
-    }
-
-    fun deleteMusicNow(){
-        if(mPlayer?.media == musicSelected?.getMedia()) {
-            mPlayer?.stop()
-            mPlayer?.dispose()
-            mPlayer = null
-            musicSlider.value = 0.0
-        }
-
-        observableList.remove(musicSelected)
-    }
-
-    fun updateSlider(){
-        if(mPlayer != null){
-            try{
-                println(musicSlider.value)
-                mPlayer!!.seek(Duration((mPlayer!!.stopTime.toMillis() / 100 * musicSlider.value)))
-            }catch (e : MediaException){
-                e.printStackTrace()
-            }
-        }
-    }
-
-    companion object {}
+    protected var tableViewMusic : TableView<Music> = MusicTableGeneration.init(this)
+    internal lateinit var mainBlock : VBox
+    internal lateinit var musicTimer : Text
+    internal lateinit var musicName : Text
+    internal lateinit var musicSlider : Slider
+    internal lateinit var volumeSlider : Slider
 }

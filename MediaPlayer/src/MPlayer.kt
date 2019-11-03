@@ -1,12 +1,13 @@
+import Pages.Main.MainStage
 import javafx.application.Application
 import javafx.stage.Stage
 
 open class MPlayer : Application() {
-    private var view = View()
-
     @Throws(Exception::class)
     override fun start(primaryStage: Stage){
-        view.start()
+        var stage = Stage()
+        stage.scene = MainStage().scene
+        stage.show()
     }
 
     companion object {
