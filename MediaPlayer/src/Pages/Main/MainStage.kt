@@ -25,8 +25,6 @@ class MainStage : Stage() {
         controller.volumeSlider = (mainScene.lookup("#volumeSlider") as Slider)
         controller.musicTimer = (mainScene.lookup("#musicTimer") as Text)
         controller.musicName = (mainScene.lookup("#musicName") as Text)
-        controller.spectrumChart = (mainScene.lookup("#spectrumChart") as AreaChart<String, Number>)
-        controller.spectrumBarChart = (mainScene.lookup("#spectrumBarChart") as BarChart<String, Number>)
         controller.init()
 
         scene = Scene(mainScene)

@@ -9,30 +9,16 @@ import javafx.scene.media.AudioSpectrumListener
 import javafx.scene.media.MediaException
 import javafx.scene.media.MediaPlayer
 import javafx.util.Duration
-import javafx.scene.paint.Color
-
 
 class MainController : Model() {
 
     fun init(){
         mainBlock.children.add(tableViewMusic)
 
-        for(i in 0..127){
+        for(i in 0..127){ // Spectrum preparation.
             spectrumData.data.add(XYChart.Data<String, Number>(i.toString(), 0))
-            spectrumBarData.data.add(XYChart.Data<String, Number>(i.toString(), 0))
         }
-        spectrumChart.data.add(spectrumData)
-        spectrumBarChart.data.add(spectrumBarData)
-
-        //val line = spectrumBarData.node.lookup(".chart-series-area-line") //TODO задание спектруму цвета исходя из частоты.
-//        val color = Color.AQUA // or any other color
-//        val rgb = String.format(
-//            "%d, %d, %d",
-//            (color.red * 255).toInt(),
-//            (color.green * 255).toInt(),
-//            (color.blue * 255).toInt()
-//        )
-        //line.style = "-fx-stroke: rgba($rgb, 1.0);"
+        spectrumBarChart.data.add(spectrumData)
 
         Thread(Runnable {
             while (true) {
@@ -148,17 +134,15 @@ class MainController : Model() {
             mPlayer?.dispose()
             mPlayer = MediaPlayer(musicSelected?.getMedia())
 
-            mPlayer?.audioSpectrumInterval = 0.001
+            mPlayer?.audioSpectrumInterval = 0.005
             mPlayer?.audioSpectrumListener = AudioSpectrumListener { d, d2, magnitudes, phases -> // Spectrum listener.
                 for(i in 0..127){
                     var newValue = (magnitudes[i].toDouble() - mPlayer?.audioSpectrumThreshold!!) * mPlayer?.volume!!
                     if(spectrumData.data[i].yValue.toDouble() < newValue) {
                         spectrumData.data[i].yValue = newValue
-                        spectrumBarData.data[i].yValue = newValue
                     }
                     else {
                         spectrumData.data[i].yValue = spectrumData.data[i].yValue.toDouble() - 0.1
-                        spectrumBarData.data[i].yValue = spectrumBarData.data[i].yValue.toDouble() - 0.1
                     }
                 }
             }
@@ -215,5 +199,15 @@ class MainController : Model() {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun spectrumPageTurnOn(){
+        mainBlock.children.clear()
+        mainBlock.children.add(spectrumBarChart)
+    }
+
+    fun musicTableTurnOn(){
+        mainBlock.children.clear()
+        mainBlock.children.add(tableViewMusic)
     }
 }

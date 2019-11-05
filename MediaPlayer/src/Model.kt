@@ -1,4 +1,5 @@
 import UI.MusicTableGeneration
+import UI.SpectrumChartGeneration
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
@@ -28,7 +29,6 @@ open class Model() {
     internal var musicSelected : Music? = null
     internal var observableList : ObservableList<Music> = FXCollections.observableArrayList()
     internal var spectrumData = XYChart.Series<String, Number>()
-    internal var spectrumBarData = XYChart.Series<String, Number>()
 
     protected val fileChooser = FileChooser()
     protected val folderChooser = DirectoryChooser()
@@ -39,6 +39,5 @@ open class Model() {
     internal lateinit var musicName : Text
     internal lateinit var musicSlider : Slider
     internal lateinit var volumeSlider : Slider
-    internal lateinit var spectrumChart : AreaChart<String, Number>
-    internal lateinit var spectrumBarChart : BarChart<String, Number>
+    internal var spectrumBarChart = SpectrumChartGeneration.init()
 }
