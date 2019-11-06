@@ -10,12 +10,13 @@ import javafx.scene.media.MediaException
 import javafx.scene.media.MediaPlayer
 import javafx.util.Duration
 
+
 class MainController : Model() {
 
     fun init(){
         mainBlock.children.add(tableViewMusic)
 
-        for(i in 0..127){ // Spectrum preparation.
+        for(i in 0 until numOfBars){ // Spectrum preparation.
             spectrumData.data.add(XYChart.Data<String, Number>(i.toString(), 0))
         }
         spectrumBarChart.data.add(spectrumData)
@@ -135,16 +136,22 @@ class MainController : Model() {
             mPlayer = MediaPlayer(musicSelected?.getMedia())
 
             mPlayer?.audioSpectrumInterval = 0.005
+            mPlayer?.audioSpectrumNumBands = numOfBars
             mPlayer?.audioSpectrumListener = AudioSpectrumListener { d, d2, magnitudes, phases -> // Spectrum listener.
-                for(i in 0..127){
+                for(i in 0 until numOfBars){
                     var newValue = (magnitudes[i].toDouble() - mPlayer?.audioSpectrumThreshold!!) * mPlayer?.volume!!
                     if(spectrumData.data[i].yValue.toDouble() < newValue) {
                         spectrumData.data[i].yValue = newValue
                     }
                     else {
-                        spectrumData.data[i].yValue = spectrumData.data[i].yValue.toDouble() - 0.1
+                        spectrumData.data[i].yValue = spectrumData.data[i].yValue.toDouble() - 0.2
                     }
                 }
+
+                spectrumBarChart.lookupAll(".default-color0.chart-bar")
+                    .forEach { n ->
+                        n.style = "-fx-bar-fill: rgb(${(spectrumData.data[0].yValue.toInt() * 255) / 60}, 0, 0);"
+                    }
             }
 
             musicSelected!!.setName("-> " + musicSelected!!.getName())

@@ -150,7 +150,3 @@
 .button:default:hover {
     -fx-background-color: derive(-fx-focus-color,30%);
 }
-
-.chart-bar {
-    -fx-bar-fill: #000000;
-}

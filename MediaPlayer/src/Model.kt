@@ -28,7 +28,6 @@ open class Model() {
     protected var checkDurationMediaPlayer : MediaPlayer? = null
     internal var musicSelected : Music? = null
     internal var observableList : ObservableList<Music> = FXCollections.observableArrayList()
-    internal var spectrumData = XYChart.Series<String, Number>()
 
     protected val fileChooser = FileChooser()
     protected val folderChooser = DirectoryChooser()
@@ -39,5 +38,8 @@ open class Model() {
     internal lateinit var musicName : Text
     internal lateinit var musicSlider : Slider
     internal lateinit var volumeSlider : Slider
-    internal var spectrumBarChart = SpectrumChartGeneration.init()
+
+    internal var spectrumBarChart = SpectrumChartGeneration.init() // Spectrum.
+    internal var spectrumData = XYChart.Series<String, Number>()
+    internal val numOfBars = 10
 }
