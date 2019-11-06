@@ -63,16 +63,16 @@ class MainController : Model() {
 
     fun addNewFolder() {
         selectedFile = folderChooser.showDialog(primaryStage)
-        if (selectedFile != null) {
-            Thread {
+        Thread {
+            if (selectedFile != null) {
                 var uri = selectedFile!!.toURI().toString()
                 var paths = FolderReader(uri.substringAfter('/').replace("%20", " ")).read()
                 var listNewMusic: ArrayList<Music> = arrayListOf()
 
                 fromPathsToMusics(uri, paths, listNewMusic)
                 checkMusicDuration(listNewMusic)
-            }.start()
-        }
+            }
+        }.start()
     }
 
     fun settingsShow(){
