@@ -2,7 +2,7 @@ import Pages.Main.MainStage
 import javafx.application.Application
 import javafx.stage.Stage
 
-open class MPlayer : Application() {
+open class AppStarter : Application() {
     @Throws(Exception::class)
     override fun start(primaryStage: Stage){
         var stage = Stage()
@@ -13,7 +13,7 @@ open class MPlayer : Application() {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            launch(MPlayer::class.java)
+            launch(AppStarter::class.java)
         }
     }
 }

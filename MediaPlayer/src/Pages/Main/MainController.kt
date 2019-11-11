@@ -4,37 +4,43 @@ import FolderReader
 import Model
 import Music
 import Pages.Settings.SettingsStage
+import javafx.beans.Observable
+import javafx.collections.FXCollections
 import javafx.scene.chart.XYChart
 import javafx.scene.media.AudioSpectrumListener
+import javafx.scene.media.Media
 import javafx.scene.media.MediaException
 import javafx.scene.media.MediaPlayer
 import javafx.util.Duration
-
+import org.eclipse.fx.ui.controls.filesystem.DirectoryTreeView
+import org.eclipse.fx.ui.controls.filesystem.ResourceItem
+import java.nio.file.Paths
+import javafx.scene.Scene
+import javafx.scene.control.SplitPane
+import javafx.stage.Stage
+import org.eclipse.fx.ui.controls.filesystem.ResourcePreview
+import org.eclipse.fx.ui.controls.filesystem.IconSize
+import org.eclipse.fx.ui.controls.filesystem.DirectoryView
 
 class MainController : Model() {
 
     fun init(){
-        mainBlock.children.add(tableViewMusic)
+        musicTableTurnOn()
 
-        for(i in 0 until numOfBars){ // Spectrum preparation.
+        for(i in 0 until numOfBars){ // Spectrum preparation. (Вынести отдельно)
             spectrumData.data.add(XYChart.Data<String, Number>(i.toString(), 0))
         }
         spectrumBarChart.data.add(spectrumData)
 
         Thread(Runnable {
             while (true) {
-                if ( mPlayer != null) {
-                    try {
-                        val currentTime = mPlayer?.currentTime!!.toSeconds()
-                        val allTime = mPlayer?.stopTime!!.toSeconds()
+                if (player.isInitialized()) {
+                    val currentTime = player.getCurrentTime().toSeconds()
+                    val allTime = player.getEndTime().toSeconds()
 
-                        musicTimer.text = "${(currentTime / 60).toInt()}.${(currentTime % 60).toInt()} / ${musicPlaying?.getDuration()}"
-                        musicName.text = "${musicPlaying?.getName()}"
-                        musicSlider.value = currentTime * 100.0 / allTime
-                    }catch (e : MediaException){
-                        mPlayer?.dispose()
-                        mPlayer = null
-                    }
+                    musicTimer.text = "${(currentTime / 60).toInt()}.${(currentTime % 60).toInt()} / ${player.playingMusic.getDuration()}"
+                    musicName.text = "${player.playingMusic.getName()}"
+                    musicSlider.value = currentTime * 100.0 / allTime
                 }else{
                     musicName.text = "Music name..."
                     musicTimer.text = "Timer..."
@@ -49,6 +55,31 @@ class MainController : Model() {
                 }
             }
         }).start()
+
+        player.mediaPlayerSetUp = {mediaPlayer ->
+            volumeSliderDragged()
+            mediaPlayer.audioSpectrumInterval = 0.02
+            mediaPlayer.audioSpectrumNumBands = numOfBars
+            mediaPlayer.audioSpectrumListener = AudioSpectrumListener { d, d2, magnitudes, phases -> // Spectrum listener.
+                for(i in 0 until numOfBars){
+                    var newValue = (magnitudes[i].toDouble() - mediaPlayer.audioSpectrumThreshold) * mediaPlayer.volume
+                    if(spectrumData.data[i].yValue.toDouble() < newValue) {
+                        spectrumData.data[i].yValue = newValue
+                    }
+                    else {
+                        spectrumData.data[i].yValue = spectrumData.data[i].yValue.toDouble() - 0.4
+                    }
+                }
+
+                spectrumBarChart.lookupAll(".default-color0.chart-bar").forEachIndexed { i, node ->
+                    node.style =
+                        if(i < numOfBars)
+                            "-fx-bar-fill: rgb(${(spectrumData.data[i].yValue.toInt() * 255) / 60}, 0, 255);"
+                        else
+                            ""
+                }
+            }
+        }
     }
 
     fun addNewFile() {
@@ -81,16 +112,16 @@ class MainController : Model() {
     }
 
     fun musicSliderClick(){
-        updateSlider()
+        player.seek(Duration((player.getEndTime().toMillis() / 100) * musicSlider.value))
     }
 
     fun volumeSliderDragged(){
-        mPlayer?.volume  = volumeSlider.value / 100
+        player.setVolume(volumeSlider.value / 100)
     }
 
     private fun addNewMusic(url:String) : Music{
         var music = Music(url)
-        observableList.add(music)
+        player.addNewMusic(music)
         return music
     }
 
@@ -125,88 +156,36 @@ class MainController : Model() {
         fromPathsToMusics(uri, musicsPaths, listNewMusic)
     }
 
-    fun setMusicNow(){
-        if(observableList.isEmpty()){
-            return
-        }
-
-        if(musicSelected != null && (musicPlaying != musicSelected || musicPlaying == null)){
-            mPlayer?.stop()
-            mPlayer?.dispose()
-            mPlayer = MediaPlayer(musicSelected?.getMedia())
-
-            mPlayer?.audioSpectrumInterval = 0.005
-            mPlayer?.audioSpectrumNumBands = numOfBars
-            mPlayer?.audioSpectrumListener = AudioSpectrumListener { d, d2, magnitudes, phases -> // Spectrum listener.
-                for(i in 0 until numOfBars){
-                    var newValue = (magnitudes[i].toDouble() - mPlayer?.audioSpectrumThreshold!!) * mPlayer?.volume!!
-                    if(spectrumData.data[i].yValue.toDouble() < newValue) {
-                        spectrumData.data[i].yValue = newValue
-                    }
-                    else {
-                        spectrumData.data[i].yValue = spectrumData.data[i].yValue.toDouble() - 0.2
-                    }
-                }
-
-                spectrumBarChart.lookupAll(".default-color0.chart-bar")
-                    .forEach { n ->
-                        n.style = "-fx-bar-fill: rgb(${(spectrumData.data[0].yValue.toInt() * 255) / 60}, 0, 0);"
-                    }
-            }
-
-            musicSelected!!.setName("-> " + musicSelected!!.getName())
-            if(musicPlaying != null) musicPlaying!!.setName(musicPlaying!!.getName().substringAfter(' '))
-            musicPlaying = musicSelected
-        }
-
-        mPlayer?.play()
+    fun setSelectedMusic(){
+        player.setSelectedMusic()
     }
 
     fun setNextMusic(){
-        if(mPlayer == null) return
-        musicSelected = observableList[(observableList.indexOf(musicPlaying) + 1) % observableList.count()]
-        setMusicNow()
+        player.setNextMusic()
     }
 
     fun setPrevMusic(){
-        if(mPlayer == null) return
-        musicSelected = if(observableList.indexOf(musicPlaying) == 0)
-            observableList[observableList.count() - 1]
-        else
-            observableList[(observableList.indexOf(musicPlaying) - 1)]
-
-        setMusicNow()
+        player.setPrevMusic()
     }
 
     fun pausePlayer(){
-        mPlayer?.pause()
+        player.pause()
     }
 
     fun stopPlayer(){
-        mPlayer?.stop()
+        player.stop()
     }
 
-    fun deleteMusicNow(){
-        if(mPlayer?.media == musicSelected?.getMedia()) {
-            mPlayer?.stop()
-            mPlayer?.dispose()
-            mPlayer = null
-            musicSlider.value = 0.0
-        }
-
-        observableList.remove(musicSelected)
-    }
-
-    private fun updateSlider(){
-        if(mPlayer != null){
-            try{
-                println(musicSlider.value)
-                mPlayer!!.seek(Duration((mPlayer!!.stopTime.toMillis() / 100 * musicSlider.value)))
-            }catch (e : MediaException){
-                e.printStackTrace()
-            }
-        }
-    }
+//    fun deleteMusicNow(){
+//        if(mPlayer?.media == musicSelected?.getMedia()) {
+//            mPlayer?.stop()
+//            mPlayer?.dispose()
+//            mPlayer = null
+//            musicSlider.value = 0.0
+//        }
+//
+//        observableList.remove(musicSelected)
+//    }
 
     fun spectrumPageTurnOn(){
         mainBlock.children.clear()
@@ -216,5 +195,43 @@ class MainController : Model() {
     fun musicTableTurnOn(){
         mainBlock.children.clear()
         mainBlock.children.add(tableViewMusic)
+    }
+
+    fun createAndShowDirectoryTree(){
+        var rootDirItem = ResourceItem.createObservedPath(
+            Paths.get("C:\\Users\\90-STICK\\Music\\")
+        )
+
+        val tv = DirectoryTreeView()
+        tv.iconSize = IconSize.MEDIUM
+        tv.rootDirectories = FXCollections.observableArrayList(rootDirItem)
+
+        val v = DirectoryView()
+        v.iconSize = IconSize.MEDIUM
+
+        tv.selectedItems.addListener { o: Observable ->
+            if (!tv.selectedItems.isEmpty()) {
+                v.dir = tv.selectedItems[0]
+            } else {
+                v.dir = null
+            }
+        }
+
+        val prev = ResourcePreview()
+        v.selectedItems.addListener { o: Observable ->
+            if (v.selectedItems.size == 1) {
+                prev.item = v.selectedItems[0]
+            } else {
+                prev.item = null
+            }
+        }
+
+        val p = SplitPane(tv, v, prev)
+        p.setDividerPositions(0.3, 0.8)
+
+        val s = Scene(p, 500.0, 500.0)
+        val newScene = Stage()
+        newScene.scene = s
+        newScene.show()
     }
 }

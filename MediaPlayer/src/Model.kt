@@ -17,17 +17,15 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import javafx.util.Duration
+import src.Player
 import java.io.File
 
 open class Model() {
     protected var primaryStage = Stage()
 
-    protected var musicPlaying : Music? = null
+    internal var player = Player()
     protected var selectedFile: File? = null
-    protected var mPlayer: MediaPlayer? = null
     protected var checkDurationMediaPlayer : MediaPlayer? = null
-    internal var musicSelected : Music? = null
-    internal var observableList : ObservableList<Music> = FXCollections.observableArrayList()
 
     protected val fileChooser = FileChooser()
     protected val folderChooser = DirectoryChooser()

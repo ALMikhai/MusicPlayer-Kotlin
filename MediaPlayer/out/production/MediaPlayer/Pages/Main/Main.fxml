@@ -86,7 +86,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button id="playButton" mnemonicParsing="false" onAction="#setMusicNow">
+                  <Button id="playButton" mnemonicParsing="false" onAction="#setSelectedMusic">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
