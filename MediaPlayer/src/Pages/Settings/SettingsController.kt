@@ -8,6 +8,6 @@ class SettingsController(){
     }
 
     public fun onApplyClick(){
-        _stage.settings.mainMusicDirectory.set(_stage.directoryPathTextBox.text)
+        _stage.settings.mainMusicDirectory.set(_stage.directoryPathLabel.text)
     }
 }

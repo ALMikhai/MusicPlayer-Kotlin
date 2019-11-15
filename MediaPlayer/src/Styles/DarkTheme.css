@@ -2,10 +2,10 @@
     -fx-background-color: #1d1d1d;
 }
 
-.label {
-    -fx-font-size: 11pt;
-    -fx-font-family: "Segoe UI Semibold";
+.label_settings {
+    -fx-font-size: 12.5pt;
     -fx-text-fill: white;
+    -fx-background-color: rgb(53, 53, 53);
     -fx-opacity: 0.6;
 }
 
@@ -109,11 +109,10 @@
  */
 .button {
     -fx-padding: 5 22 5 22;   
-    -fx-border-color: #e2e2e2;
+    -fx-border-color: #111111;
     -fx-border-width: 2;
     -fx-background-radius: 0;
     -fx-background-color: #e3e3e3;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 11pt;
     -fx-text-fill: #292929;
     -fx-background-insets: 0 0 0 0, 0, 1, 2;
