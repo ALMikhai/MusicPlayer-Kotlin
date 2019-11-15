@@ -18,12 +18,14 @@ import javafx.stage.FileChooser
 import javafx.stage.Stage
 import javafx.util.Duration
 import src.Player
+import src.SettingsModel
 import java.io.File
 
 open class Model() {
     protected var primaryStage = Stage()
 
     internal var player = Player()
+    internal var settings = SettingsModel()
     protected var selectedFile: File? = null
     protected var checkDurationMediaPlayer : MediaPlayer? = null
 

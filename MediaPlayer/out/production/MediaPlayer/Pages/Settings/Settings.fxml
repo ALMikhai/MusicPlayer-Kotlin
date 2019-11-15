@@ -13,7 +13,7 @@
          <bottom>
             <HBox alignment="CENTER_RIGHT" prefHeight="44.0" prefWidth="500.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onMouseClicked="#onApplyClick" text="Apply">
+                  <Button alignment="CENTER_RIGHT" mnemonicParsing="false" onAction="#onApplyClick" text="Apply">
                      <HBox.margin>
                         <Insets right="10.0" />
                      </HBox.margin>

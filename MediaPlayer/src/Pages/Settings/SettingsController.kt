@@ -1,17 +1,13 @@
 package Pages.Settings
 
-import javafx.fxml.FXMLLoader
-import javafx.scene.Parent
-
 class SettingsController(){
     private lateinit var _stage : SettingsStage
 
-    fun setMainModel(mainStage : SettingsStage){
-        _stage = mainStage
+    fun setMainModel(settingsStage : SettingsStage){
+        _stage = settingsStage
     }
 
-    fun onApplyClick(){
-        // TODO Change directory.
-        println(_stage.directoryPathTextBox.text)
+    public fun onApplyClick(){
+        _stage.settings.mainMusicDirectory.set(_stage.directoryPathTextBox.text)
     }
 }

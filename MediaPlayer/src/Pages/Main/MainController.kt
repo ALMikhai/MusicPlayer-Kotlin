@@ -58,6 +58,7 @@ class MainController : Model() {
 
         player.mediaPlayerSetUp = {mediaPlayer ->
             volumeSliderDragged()
+
             mediaPlayer.audioSpectrumInterval = 0.02
             mediaPlayer.audioSpectrumNumBands = numOfBars
             mediaPlayer.audioSpectrumListener = AudioSpectrumListener { d, d2, magnitudes, phases -> // Spectrum listener.
@@ -78,6 +79,10 @@ class MainController : Model() {
                         else
                             ""
                 }
+            }
+
+            mediaPlayer.onEndOfMedia = Runnable {
+                player.setNextMusic()
             }
         }
     }
@@ -108,7 +113,7 @@ class MainController : Model() {
     }
 
     fun settingsShow(){
-        SettingsStage(this).showAndWait()
+        SettingsStage(settings).showAndWait()
     }
 
     fun musicSliderClick(){
