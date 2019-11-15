@@ -6,23 +6,25 @@
     -fx-font-size: 12.5pt;
     -fx-text-fill: white;
     -fx-background-color: rgb(53, 53, 53);
-    -fx-opacity: 0.6;
+    -fx-opacity: 1;
 }
 
 .text {
-	-fx-fill: white;
+	-fx-fill: rgb(255, 255, 255);
+}
+
+.text-menu{
+    -fx-fill: rgb(255, 255, 255);
 }
 
 .label-bright {
     -fx-font-size: 11pt;
-    -fx-font-family: "Segoe UI Semibold";
     -fx-text-fill: white;
     -fx-opacity: 1;
 }
 
 .label-header {
     -fx-font-size: 32pt;
-    -fx-font-family: "Segoe UI Light";
     -fx-text-fill: white;
     -fx-opacity: 1;
 }
@@ -59,7 +61,6 @@
 
 .table-view .column-header .label {
     -fx-font-size: 20pt;
-    -fx-font-family: "Segoe UI Light";
     -fx-text-fill: white;
     -fx-alignment: center-left;
     -fx-opacity: 1;
@@ -88,7 +89,6 @@
 
 .menu-bar .label {
     -fx-font-size: 14pt;
-    -fx-font-family: "Segoe UI Light";
     -fx-text-fill: rgb(66, 66, 66);
     -fx-opacity: 0.9;
 }
@@ -99,7 +99,6 @@
 
 .text-field {
     -fx-font-size: 12pt;
-    -fx-font-family: "Segoe UI Semibold";
 }
 
 /* 
@@ -148,4 +147,21 @@
 
 .button:default:hover {
     -fx-background-color: derive(-fx-focus-color,30%);
+}
+
+.tree-view, .tree-cell {
+    -fx-background-color: black ;
+    -fx-text-fill: white ;
+}
+.tree-cell:expanded, .tree-cell:sub-tree-item {
+    -fx-background-color: #404040 ;
+}
+.tree-cell:selected {
+    -fx-font-weight: bold ;
+}
+.tree-cell {
+    -fx-padding: 0.75em 0em 0.75em 0em ;
+}
+.tree-cell:sub-tree-item {
+    -fx-padding: 0.25em ;
 }

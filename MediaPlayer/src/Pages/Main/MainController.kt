@@ -202,17 +202,17 @@ class MainController : Model() {
         mainBlock.children.add(tableViewMusic)
     }
 
-    fun createAndShowDirectoryTree(){
+    fun directoryTreeTurnOn(){
         var rootDirItem = ResourceItem.createObservedPath(
-            Paths.get("C:\\Users\\90-STICK\\Music\\")
+            Paths.get(settings.mainMusicDirectory.get())
         )
 
         val tv = DirectoryTreeView()
-        tv.iconSize = IconSize.MEDIUM
+        tv.iconSize = IconSize.SMALL
         tv.rootDirectories = FXCollections.observableArrayList(rootDirItem)
 
         val v = DirectoryView()
-        v.iconSize = IconSize.MEDIUM
+        v.iconSize = IconSize.SMALL
 
         tv.selectedItems.addListener { o: Observable ->
             if (!tv.selectedItems.isEmpty()) {
@@ -222,21 +222,10 @@ class MainController : Model() {
             }
         }
 
-        val prev = ResourcePreview()
-        v.selectedItems.addListener { o: Observable ->
-            if (v.selectedItems.size == 1) {
-                prev.item = v.selectedItems[0]
-            } else {
-                prev.item = null
-            }
-        }
-
-        val p = SplitPane(tv, v, prev)
+        val p = SplitPane(tv, v)
         p.setDividerPositions(0.3, 0.8)
 
-        val s = Scene(p, 500.0, 500.0)
-        val newScene = Stage()
-        newScene.scene = s
-        newScene.show()
+        mainBlock.children.clear()
+        mainBlock.children.add(p)
     }
 }

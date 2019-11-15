@@ -34,7 +34,7 @@ import src.SettingsModel
             val directoryChooser = DirectoryChooser()
             var directory = directoryChooser.showDialog(this)
             if(directory != null){
-                directoryPathLabel.text = directory.toURI().toString()
+                directoryPathLabel.text = (directory.toURI().toString()).substringAfter('/')
             }
         }
     }
