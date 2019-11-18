@@ -1,5 +1,6 @@
 import UI.MusicTableGeneration
 import UI.SpectrumChartGeneration
+import com.google.gson.GsonBuilder
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
@@ -26,7 +27,6 @@ open class Model() {
     protected var primaryStage = Stage()
 
     internal var player = Player()
-    internal var settings = SettingsModel()
     protected var selectedFile: File? = null
     protected var checkDurationMediaPlayer : MediaPlayer? = null
 
@@ -43,4 +43,10 @@ open class Model() {
     internal var spectrumBarChart = SpectrumChartGeneration.init() // Spectrum.
     internal var spectrumData = XYChart.Series<String, Number>()
     internal val numOfBars = 10
+
+    private var toSettingsPath : String = "Settings/Settings.json"
+    internal var settings = GsonBuilder().create().fromJson<SettingsModel>(
+        File(toSettingsPath).inputStream().bufferedReader().readLine(),
+        SettingsModel::class.java
+    )
 }

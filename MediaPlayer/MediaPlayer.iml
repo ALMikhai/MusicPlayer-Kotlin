@@ -409,5 +409,14 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="at.bestsolution.efxclipse.ide:org.eclipse.fx.ide.l10n:2.4.0" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/gson-2.8.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
