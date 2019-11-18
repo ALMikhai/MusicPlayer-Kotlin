@@ -6,6 +6,8 @@ import Music
 import Pages.Settings.SettingsStage
 import javafx.beans.Observable
 import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
+import javafx.event.EventHandler
 import javafx.scene.chart.XYChart
 import javafx.scene.media.AudioSpectrumListener
 import javafx.scene.media.Media
@@ -194,12 +196,12 @@ class MainController : Model() {
 
     fun spectrumPageTurnOn(){
         mainBlock.children.clear()
-        mainBlock.children.add(spectrumBarChart)
+        mainBlock.center = spectrumBarChart;
     }
 
     fun musicTableTurnOn(){
         mainBlock.children.clear()
-        mainBlock.children.add(tableViewMusic)
+        mainBlock.center = tableViewMusic;
     }
 
     fun directoryTreeTurnOn(){
@@ -222,10 +224,16 @@ class MainController : Model() {
             }
         }
 
+        v.selectedItems.addListener { change: ListChangeListener.Change<out ResourceItem>? ->
+            if(v.selectedItems.isNotEmpty()){
+                println("${v.selectedItems[0].uri}")
+            }
+        }
+
         val p = SplitPane(tv, v)
         p.setDividerPositions(0.3, 0.8)
 
         mainBlock.children.clear()
-        mainBlock.children.add(p)
+        mainBlock.center = p;
     }
 }

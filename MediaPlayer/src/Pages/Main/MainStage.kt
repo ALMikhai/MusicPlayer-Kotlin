@@ -9,6 +9,7 @@ import javafx.scene.chart.AreaChart
 import javafx.scene.chart.BarChart
 import javafx.scene.control.Label
 import javafx.scene.control.Slider
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import javafx.stage.Stage
@@ -20,7 +21,7 @@ class MainStage : Stage() {
         loader.location = javaClass.getResource("Main.fxml")
         var mainScene = loader.load<Parent>()
         val controller = loader.getController<MainController>()
-        controller.mainBlock = (mainScene.lookup("#mainVBox") as VBox)
+        controller.mainBlock = (mainScene.lookup("#mainBlock") as BorderPane)
         controller.musicSlider = (mainScene.lookup("#musicSlider") as Slider)
         controller.volumeSlider = (mainScene.lookup("#volumeSlider") as Slider)
         controller.musicTimer = (mainScene.lookup("#musicTimer") as Text)

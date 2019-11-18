@@ -153,9 +153,9 @@
     -fx-background-color: black ;
     -fx-text-fill: white ;
 }
-.tree-cell:expanded, .tree-cell:sub-tree-item {
+/* .tree-cell:expanded, .tree-cell:sub-tree-item {
     -fx-background-color: #404040 ;
-}
+} */
 .tree-cell:selected {
     -fx-font-weight: bold ;
 }

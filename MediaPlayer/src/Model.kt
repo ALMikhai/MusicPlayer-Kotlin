@@ -9,6 +9,7 @@ import javafx.scene.chart.XYChart
 import javafx.scene.control.Label
 import javafx.scene.control.Slider
 import javafx.scene.control.TableView
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import javafx.scene.media.MediaException
 import javafx.scene.media.MediaPlayer
@@ -33,7 +34,7 @@ open class Model() {
     protected val folderChooser = DirectoryChooser()
 
     protected var tableViewMusic : TableView<Music> = MusicTableGeneration.init(this)
-    internal lateinit var mainBlock : VBox
+    internal lateinit var mainBlock : BorderPane
     internal lateinit var musicTimer : Text
     internal lateinit var musicName : Text
     internal lateinit var musicSlider : Slider

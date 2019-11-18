@@ -58,7 +58,7 @@
                         </MenuButton>
                      </children>
                   </HBox>
-                  <VBox id="mainVBox" />
+                  <BorderPane id="mainBlock" VBox.vgrow="ALWAYS" />
                </children>
             </VBox>
          </center>
