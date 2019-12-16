@@ -1,41 +1,36 @@
-import javafx.beans.property.Property
 import javafx.beans.property.SimpleStringProperty
-import javafx.collections.ObservableList
 import javafx.scene.media.Media
-import javafx.scene.media.MediaException
-import javafx.scene.media.MediaPlayer
+import src.Mp3Metadata
 
 class Music(path: String){
     private var _path = path
-    private lateinit var _musicMedia : Media
-    private lateinit var _name : SimpleStringProperty
-    private lateinit var _duration : SimpleStringProperty
+    private var _metadata : Mp3Metadata
+    private var _musicMedia : Media
+    private var _name : SimpleStringProperty
+    private var _duration : SimpleStringProperty
 
     init {
-        try {
-            _duration = SimpleStringProperty("Loading...")
-            _musicMedia = Media(path)
-            _name = SimpleStringProperty(path.replace("%20", " ").substringAfterLast('/'))
-        }catch (e: MediaException){
-            e.printStackTrace()
-        }
+        _metadata = Mp3Metadata(_path.substringAfter('/').replace("%20", " "))
+        _duration = SimpleStringProperty(_metadata.Duration)
+        _musicMedia = Media(path)
+        _name = SimpleStringProperty("${_metadata.Author} - ${_metadata.Title}")
     }
 
     fun getName() : String{
         return _name.get()
     }
 
-    fun setName(name : String){
-        _name = SimpleStringProperty(name)
-    }
+//    fun setName(name : String){
+//        _name = SimpleStringProperty(name)
+//    }
 
     fun getDuration() : String{
         return _duration.get()
     }
 
-    fun setDuration(dur : String){
-        _duration = SimpleStringProperty(dur)
-    }
+//    fun setDuration(dur : String){
+//        _duration = SimpleStringProperty(dur)
+//    }
 
     fun getPath() : String {
         return _path

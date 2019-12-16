@@ -7,20 +7,13 @@ import Pages.Settings.SettingsStage
 import javafx.beans.Observable
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
-import javafx.event.EventHandler
 import javafx.scene.chart.XYChart
 import javafx.scene.media.AudioSpectrumListener
-import javafx.scene.media.Media
-import javafx.scene.media.MediaException
-import javafx.scene.media.MediaPlayer
 import javafx.util.Duration
 import org.eclipse.fx.ui.controls.filesystem.DirectoryTreeView
 import org.eclipse.fx.ui.controls.filesystem.ResourceItem
 import java.nio.file.Paths
-import javafx.scene.Scene
 import javafx.scene.control.SplitPane
-import javafx.stage.Stage
-import org.eclipse.fx.ui.controls.filesystem.ResourcePreview
 import org.eclipse.fx.ui.controls.filesystem.IconSize
 import org.eclipse.fx.ui.controls.filesystem.DirectoryView
 
@@ -89,15 +82,16 @@ class MainController : Model() {
         }
     }
 
-    fun addNewFile() {
+    fun chooseNewFile() {
         selectedFile = fileChooser.showOpenDialog(primaryStage)
         if (selectedFile != null) {
-            var url = selectedFile!!.toURI()
-            println(url.toString())
-            var listNewMusic : ArrayList<Music> = arrayListOf()
-            listNewMusic.add(addNewMusic(url.toString()))
-            checkMusicDuration(listNewMusic)
+            var uri = selectedFile!!.toURI().toString()
+            addNewFile(uri)
         }
+    }
+
+    fun addNewFile(uri: String) {
+        addNewMusic(uri)
     }
 
     fun addNewFolder() {
@@ -106,12 +100,18 @@ class MainController : Model() {
             if (selectedFile != null) {
                 var uri = selectedFile!!.toURI().toString()
                 var paths = FolderReader(uri.substringAfter('/').replace("%20", " ")).read()
-                var listNewMusic: ArrayList<Music> = arrayListOf()
-
-                fromPathsToMusics(uri, paths, listNewMusic)
-                checkMusicDuration(listNewMusic)
+                addMusicsFromPaths(uri, paths)
             }
         }.start()
+    }
+
+    private fun addMusicsFromPaths(uri : String, musicsPaths : ArrayList<String>){
+        musicsPaths.forEach {
+            var expansion =  it.substringAfterLast('.')
+            if(expansion == "mp3" || expansion == "wav") {
+                addNewMusic((uri + it.substringAfterLast('\\')).replace(" ", "%20"))
+            }
+        }
     }
 
     fun settingsShow(){
@@ -130,37 +130,6 @@ class MainController : Model() {
         var music = Music(url)
         player.addNewMusic(music)
         return music
-    }
-
-    private fun checkMusicDuration(musics: ArrayList<Music>){
-        if(musics.isNotEmpty()){
-            var music = musics.first()
-            checkDurationMediaPlayer = MediaPlayer(music.getMedia())
-
-            checkDurationMediaPlayer!!.onReady = Runnable {
-                var duration = checkDurationMediaPlayer!!.stopTime.toSeconds()
-                music.setDuration((duration / 60).toInt().toString() + '.' + (duration % 60).toInt().toString())
-                musics.remove(music)
-                checkDurationMediaPlayer!!.dispose()
-                checkMusicDuration(musics)
-            }
-        }
-    }
-
-    private fun fromPathsToMusics(uri : String, musicsPaths : ArrayList<String>, listNewMusic: ArrayList<Music>){
-        if(musicsPaths.isEmpty()){
-            return
-        }
-
-        var path = musicsPaths.first()
-        var expansion =  path.substringAfterLast('.')
-        var newMusic : Music
-        if(expansion == "mp3" || expansion == "wav") {
-            newMusic = addNewMusic((uri + path.substringAfterLast('\\')).replace(" ", "%20"))
-            listNewMusic.add(newMusic)
-        }
-        musicsPaths.remove(path)
-        fromPathsToMusics(uri, musicsPaths, listNewMusic)
     }
 
     fun setSelectedMusic(){
@@ -226,7 +195,10 @@ class MainController : Model() {
 
         v.selectedItems.addListener { change: ListChangeListener.Change<out ResourceItem>? ->
             if(v.selectedItems.isNotEmpty()){
-                println("${v.selectedItems[0].uri}")
+                val uri = v.selectedItems[0].uri
+                var expansion =  uri.substringAfterLast('.')
+                if (expansion == "mp3" || expansion == "wav")
+                    addNewFile(uri)
             }
         }
 

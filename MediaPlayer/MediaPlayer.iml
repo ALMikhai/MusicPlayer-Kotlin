@@ -418,5 +418,9 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="com.github.hoary.ffmpeg:FFmpeg-windows-x86_64:2.0.1.1" level="project" />
+    <orderEntry type="library" name="mp3reader-1" level="project" />
+    <orderEntry type="library" name="org.apache.tika:tika-core:1.23" level="project" />
+    <orderEntry type="library" name="org.apache.tika:tika-parsers:1.13" level="project" />
   </component>
 </module>
