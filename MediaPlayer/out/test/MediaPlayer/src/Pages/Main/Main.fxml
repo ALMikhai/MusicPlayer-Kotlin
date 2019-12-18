@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane styleClass="background" stylesheets="@../../Styles/DarkTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Pages.Main.MainController">
+   <children>
+      <BorderPane layoutX="2.0" layoutY="2.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="2.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
+         <center>
+            <VBox>
+               <children>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Text id="musicTimer" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-fill: white;" styleClass="label-bright" text="Text" wrappingWidth="100.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Text>
+                        <Text id="musicName" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="label-bright" text="Text">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Slider id="musicSlider" minHeight="14.0" minWidth="452.0" onMouseClicked="#musicSliderClick" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin>
+                        </Slider>
+                        <Slider id="volumeSlider" minorTickCount="0" onMouseDragged="#volumeSliderDragged" showTickLabels="true" showTickMarks="true" value="100.0">
+                           <HBox.margin>
+                              <Insets right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Slider>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <MenuButton mnemonicParsing="false" styleClass="munu-button" textFill="#170202">
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#musicTableTurnOn" text="PlayList" />
+                            <MenuItem mnemonicParsing="false" onAction="#spectrumPageTurnOn" text="Spectrum" />
+                              <MenuItem mnemonicParsing="false" onAction="#directoryTreeTurnOn" text="Directory" />
+                          </items>
+                        </MenuButton>
+                     </children>
+                  </HBox>
+                  <BorderPane id="mainBlock" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
+         </center>
+         <top>
+            <MenuBar BorderPane.alignment="CENTER">
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                        <MenuItem mnemonicParsing="false" onAction="#chooseNewFile" text="Open" />
+                        <MenuItem mnemonicParsing="false" onAction="#addNewFolder" text="Open as" />
+                        <MenuItem mnemonicParsing="false" onAction="#settingsShow" text="Settings" />
+                    <MenuItem mnemonicParsing="false" text="Close" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+         </top>
+         <bottom>
+            <HBox alignment="CENTER">
+               <children>
+                  <Button id="prevButton" mnemonicParsing="false" onAction="#setPrevMusic">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../resources/images/prev.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button id="playButton" mnemonicParsing="false" onAction="#setSelectedMusic">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../resources/images/play.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button id="pauseButton" mnemonicParsing="false" onAction="#pausePlayer">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../resources/images/pause.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button id="nextButton" mnemonicParsing="false" onAction="#setNextMusic">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../resources/images/next.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button id="stopButton" mnemonicParsing="false" onAction="#stopPlayer">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../resources/images/stop.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+               </children>
+            </HBox>
+         </bottom>
+      </BorderPane>
+   </children>
+</AnchorPane>
