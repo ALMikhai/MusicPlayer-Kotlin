@@ -41,11 +41,27 @@ class Mp3Metadata(var Path : String) {
         Author = metadata.get("meta:author")
         Artist = metadata.get("xmpDM:artist")
         Title = metadata.get("title")
+    }
+}
 
-//        var metadataNames = metadata.names()
-//        metadataNames.forEach {
-//            println(it)
-//            println(metadata.get(it))
-//        }
+class Mp3MetadataFromBD(val Title : String, val Author : String, val Albume : String, val Genre: String, val Duration : String, val Path: String) {
+    public fun GetTitle() : String {
+        return Title;
+    }
+
+    public fun GetAuthor() : String {
+        return Author;
+    }
+
+    public fun GetGenre() : String {
+        return Genre;
+    }
+
+    public fun GetAlbume() : String {
+        return Albume;
+    }
+
+    public fun GetDuration() : String {
+        return Duration;
     }
 }

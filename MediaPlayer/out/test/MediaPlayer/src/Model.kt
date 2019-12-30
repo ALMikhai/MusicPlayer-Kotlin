@@ -19,6 +19,7 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import javafx.util.Duration
+import src.Mp3MetadataFromBD
 import src.MusicDBController
 import src.Player
 import src.SettingsModel
@@ -44,6 +45,8 @@ open class Model() {
     internal var spectrumBarChart = SpectrumChartGeneration.init() // Spectrum.
     internal var spectrumData = XYChart.Series<String, Number>()
     internal val numOfBars = 10
+
+    internal var MusicMetadataList : ObservableList<Mp3MetadataFromBD>? = null;
 
     private var toSettingsPath : String = "Settings/Settings.json"
     internal var settings = GsonBuilder().create().fromJson<SettingsModel>(

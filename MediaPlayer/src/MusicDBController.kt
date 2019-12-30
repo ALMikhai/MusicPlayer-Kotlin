@@ -1,5 +1,8 @@
 package src
 
+import javafx.beans.Observable
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
@@ -41,24 +44,37 @@ class MusicDBController {
         execute(sql)
     }
 
-    fun selectAll() {
+    fun selectAll() : ObservableList<Mp3MetadataFromBD> {
         val sql = (
                 "SELECT * FROM Music;"
                 )
+
+        var metadataList : ObservableList<Mp3MetadataFromBD> = FXCollections.observableArrayList()
 
         try {
             val stmt: Statement = _connection.createStatement()
             var result = stmt.executeQuery(sql)
             val columns: Int = result.getMetaData().getColumnCount()
             while (result.next()) {
-                for (i in 1..columns) {
-                    print(result.getString(i).toString() + "\t")
-                }
-                println()
+                metadataList.add(Mp3MetadataFromBD(
+                    result.getString(2),
+                    result.getString(3),
+                    result.getString(4),
+                    result.getString(5),
+                    result.getString(6),
+                    result.getString(7)))
+//                for (i in 1..columns) {
+//
+//                    if (i == 7)
+//                        print(result.getString(i).toString() + "\t")
+//                }
+//                println()
             }
         } catch (e: SQLException) {
             println(e.message)
         }
+
+        return metadataList;
     }
 
     fun deleteAll() {

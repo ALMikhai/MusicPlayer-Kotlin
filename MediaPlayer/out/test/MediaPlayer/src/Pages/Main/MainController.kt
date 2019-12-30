@@ -17,11 +17,13 @@ import javafx.scene.control.SplitPane
 import org.eclipse.fx.ui.controls.filesystem.IconSize
 import org.eclipse.fx.ui.controls.filesystem.DirectoryView
 import src.MusicDBController
+import src.UI.MusicFromDirectoryTable
 
 class MainController : Model() {
 
     fun init(){
         musicTableTurnOn()
+        MusicDBController().selectAll()
 
         for(i in 0 until numOfBars){ // Spectrum preparation. (Вынести отдельно)
             spectrumData.data.add(XYChart.Data<String, Number>(i.toString(), 0))
@@ -92,7 +94,7 @@ class MainController : Model() {
     }
 
     fun addNewFile(uri: String) {
-        addNewMusic(uri)
+        player.addNewMusic(Music(uri))
     }
 
     fun addNewFolder() {
@@ -110,7 +112,7 @@ class MainController : Model() {
         musicsPaths.forEach {
             var expansion =  it.substringAfterLast('.')
             if(expansion == "mp3" || expansion == "wav") {
-                addNewMusic((uri + it.substringAfterLast('\\')).replace(" ", "%20"))
+                player.addNewMusic(Music((uri + it.substringAfterLast('\\')).replace(" ", "%20")))
             }
         }
     }
@@ -127,11 +129,10 @@ class MainController : Model() {
         player.setVolume(volumeSlider.value / 100)
     }
 
-    private fun addNewMusic(url:String) : Music{
-        var music = Music(url)
-        player.addNewMusic(music)
-        return music
-    }
+//    private fun addNewMusic(url:String){
+//        var music = Music(url)
+//        player.addNewMusic(music)
+//    }
 
     fun setSelectedMusic(){
         player.setSelectedMusic()
@@ -172,6 +173,11 @@ class MainController : Model() {
     fun musicTableTurnOn(){
         mainBlock.children.clear()
         mainBlock.center = tableViewMusic;
+    }
+
+    fun musicDBTableTurnOn(){
+        mainBlock.children.clear()
+        mainBlock.center = MusicFromDirectoryTable.init(this);
     }
 
     fun directoryTreeTurnOn(){
