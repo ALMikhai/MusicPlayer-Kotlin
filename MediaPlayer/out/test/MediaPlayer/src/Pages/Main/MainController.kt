@@ -4,6 +4,7 @@ import FolderReader
 import Model
 import Music
 import Pages.Settings.SettingsStage
+import com.coremedia.iso.boxes.vodafone.LyricsUriBox
 import javafx.beans.Observable
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
@@ -17,13 +18,13 @@ import javafx.scene.control.SplitPane
 import org.eclipse.fx.ui.controls.filesystem.IconSize
 import org.eclipse.fx.ui.controls.filesystem.DirectoryView
 import src.MusicDBController
+import src.UI.LyricsTextBox
 import src.UI.MusicFromDirectoryTable
 
 class MainController : Model() {
 
     fun init(){
         musicTableTurnOn()
-        MusicDBController().selectAll()
 
         for(i in 0 until numOfBars){ // Spectrum preparation. (Вынести отдельно)
             spectrumData.data.add(XYChart.Data<String, Number>(i.toString(), 0))
@@ -129,11 +130,6 @@ class MainController : Model() {
         player.setVolume(volumeSlider.value / 100)
     }
 
-//    private fun addNewMusic(url:String){
-//        var music = Music(url)
-//        player.addNewMusic(music)
-//    }
-
     fun setSelectedMusic(){
         player.setSelectedMusic()
     }
@@ -170,6 +166,11 @@ class MainController : Model() {
         mainBlock.center = spectrumBarChart;
     }
 
+    fun lyricsPageTurnOn(){
+        mainBlock.children.clear()
+        mainBlock.center = LyricsTextBox.init(player.getMusicNow())
+    }
+
     fun musicTableTurnOn(){
         mainBlock.children.clear()
         mainBlock.center = tableViewMusic;
@@ -180,7 +181,7 @@ class MainController : Model() {
         mainBlock.center = MusicFromDirectoryTable.init(this);
     }
 
-    fun directoryTreeTurnOn(){
+    fun directoryTreeTurnOn(){ // TODO вынеси в UI
         var rootDirItem = ResourceItem.createObservedPath(
             Paths.get(settings.mainMusicDirectory.get())
         )

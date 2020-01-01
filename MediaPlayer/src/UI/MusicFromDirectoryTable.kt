@@ -12,8 +12,10 @@ import src.MusicDBController
 class MusicFromDirectoryTable {
     companion object {
         fun init(model: Model) : TableView<Mp3MetadataFromBD> {
-            if (model.MusicMetadataList == null)
-                model.MusicMetadataList = MusicDBController().selectAll()
+            if (model.MusicMetadataList != null)
+                model.MusicMetadataList!!.clear()
+
+            model.MusicMetadataList = MusicDBController().selectAll()
 
             val table = TableView(model.MusicMetadataList)
 

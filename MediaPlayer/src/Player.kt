@@ -6,6 +6,7 @@ import javafx.collections.ObservableList
 import javafx.scene.media.Media
 import javafx.scene.media.MediaPlayer
 import java.time.Duration
+import kotlin.time.measureTime
 
 class Player {
     private lateinit var player : MediaPlayer
@@ -17,6 +18,14 @@ class Player {
 
     public fun setVolume(n : Double){ // Player.
         player.volume = n
+    }
+
+    public fun getMusicNow() : Music {
+        if (::playingMusic.isInitialized) {
+            return playingMusic
+        } else {
+            return Music("")
+        }
     }
 
     public fun setSelectedMusic(){

@@ -44,7 +44,7 @@ open class Model() {
 
     internal var spectrumBarChart = SpectrumChartGeneration.init() // Spectrum.
     internal var spectrumData = XYChart.Series<String, Number>()
-    internal val numOfBars = 10
+    internal val numOfBars = 16
 
     internal var MusicMetadataList : ObservableList<Mp3MetadataFromBD>? = null;
 
