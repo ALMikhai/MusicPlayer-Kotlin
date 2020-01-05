@@ -31,6 +31,8 @@ class SpectrumChartGeneration {
             chart.isHorizontalGridLinesVisible = false
             chart.isHorizontalZeroLineVisible = false
 
+            //chart.minHeight = 400.0
+
             return chart
         }
     }

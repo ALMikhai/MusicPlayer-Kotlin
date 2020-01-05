@@ -9,7 +9,7 @@ import java.time.Duration
 import kotlin.time.measureTime
 
 class Player {
-    private lateinit var player : MediaPlayer
+    public lateinit var player : MediaPlayer
     public val playList : ObservableList<Music> = FXCollections.observableArrayList()
     public lateinit var selectedMusic : Music
     public lateinit var playingMusic : Music

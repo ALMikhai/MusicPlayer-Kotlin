@@ -4,7 +4,6 @@ import FolderReader
 import Model
 import Music
 import Pages.Settings.SettingsStage
-import com.coremedia.iso.boxes.vodafone.LyricsUriBox
 import javafx.beans.Observable
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
@@ -15,10 +14,12 @@ import org.eclipse.fx.ui.controls.filesystem.DirectoryTreeView
 import org.eclipse.fx.ui.controls.filesystem.ResourceItem
 import java.nio.file.Paths
 import javafx.scene.control.SplitPane
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.VBox
 import org.eclipse.fx.ui.controls.filesystem.IconSize
 import org.eclipse.fx.ui.controls.filesystem.DirectoryView
-import src.MusicDBController
-import src.UI.LyricsTextBox
+import src.UI.EqualizerHBox
+import src.UI.MusicInfoTextBox
 import src.UI.MusicFromDirectoryTable
 
 class MainController : Model() {
@@ -40,6 +41,11 @@ class MainController : Model() {
                     musicTimer.text = "${(currentTime / 60).toInt()}.${(currentTime % 60).toInt()} / ${player.playingMusic.getDuration()}"
                     musicName.text = "${player.playingMusic.getName()}"
                     musicSlider.value = currentTime * 100.0 / allTime
+
+//                    player.player.audioEqualizer.bands.forEachIndexed { index, equalizerBand ->
+//                        print ("${index} - bandwidth ${equalizerBand.bandwidth} - centerFrequency ${equalizerBand.centerFrequency}, - gain ${equalizerBand.gain}")
+//                    }
+//                    println()
                 }else{
                     musicName.text = "Music name..."
                     musicTimer.text = "Timer..."
@@ -162,13 +168,18 @@ class MainController : Model() {
 //    }
 
     fun spectrumPageTurnOn(){
+//        mainBlock.children.clear()
+//        mainBlock.center = spectrumBarChart;
         mainBlock.children.clear()
-        mainBlock.center = spectrumBarChart;
+        val pane = BorderPane()
+        pane.center = spectrumBarChart
+        pane.top = EqualizerHBox.init(player)
+        mainBlock.center = pane;
     }
 
     fun lyricsPageTurnOn(){
         mainBlock.children.clear()
-        mainBlock.center = LyricsTextBox.init(player.getMusicNow())
+        mainBlock.center = MusicInfoTextBox.init(player.getMusicNow())
     }
 
     fun musicTableTurnOn(){
