@@ -26,6 +26,7 @@ class MainController : Model() {
 
     fun init(){
         musicTableTurnOn()
+        EqualizerHBox.getBox() // Equalizer init.
 
         for(i in 0 until numOfBars){ // Spectrum preparation. (Вынести отдельно)
             spectrumData.data.add(XYChart.Data<String, Number>(i.toString(), 0))
@@ -41,11 +42,6 @@ class MainController : Model() {
                     musicTimer.text = "${(currentTime / 60).toInt()}.${(currentTime % 60).toInt()} / ${player.playingMusic.getDuration()}"
                     musicName.text = "${player.playingMusic.getName()}"
                     musicSlider.value = currentTime * 100.0 / allTime
-
-//                    player.player.audioEqualizer.bands.forEachIndexed { index, equalizerBand ->
-//                        print ("${index} - bandwidth ${equalizerBand.bandwidth} - centerFrequency ${equalizerBand.centerFrequency}, - gain ${equalizerBand.gain}")
-//                    }
-//                    println()
                 }else{
                     musicName.text = "Music name..."
                     musicTimer.text = "Timer..."
@@ -89,6 +85,12 @@ class MainController : Model() {
             mediaPlayer.onEndOfMedia = Runnable {
                 player.setNextMusic()
             }
+
+            EqualizerHBox.update(player)
+        }
+
+        volumeSlider.valueProperty().addListener { _ ->
+            volumeSliderDragged()
         }
     }
 
@@ -173,7 +175,7 @@ class MainController : Model() {
         mainBlock.children.clear()
         val pane = BorderPane()
         pane.center = spectrumBarChart
-        pane.top = EqualizerHBox.init(player)
+        pane.top = EqualizerHBox.getBox()
         mainBlock.center = pane;
     }
 
@@ -192,7 +194,7 @@ class MainController : Model() {
         mainBlock.center = MusicFromDirectoryTable.init(this);
     }
 
-    fun directoryTreeTurnOn(){ // TODO вынеси в UI
+    fun directoryTreeTurnOn(){
         var rootDirItem = ResourceItem.createObservedPath(
             Paths.get(settings.mainMusicDirectory.get())
         )

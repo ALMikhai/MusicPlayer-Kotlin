@@ -38,12 +38,12 @@
                   </HBox>
                   <HBox>
                      <children>
-                        <Slider id="musicSlider" minHeight="14.0" minWidth="452.0" onMouseClicked="#musicSliderClick" HBox.hgrow="ALWAYS">
+                        <Slider id="musicSlider" minHeight="14.0" minWidth="452.0" onMouseClicked="#musicSliderClick" onMouseDragged="#musicSliderClick" HBox.hgrow="ALWAYS">
                            <HBox.margin>
                               <Insets top="5.0" />
                            </HBox.margin>
                         </Slider>
-                        <Slider id="volumeSlider" minorTickCount="0" onMouseDragged="#volumeSliderDragged" showTickLabels="true" showTickMarks="true" value="100.0">
+                        <Slider id="volumeSlider" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="100.0">
                            <HBox.margin>
                               <Insets right="5.0" top="5.0" />
                            </HBox.margin>

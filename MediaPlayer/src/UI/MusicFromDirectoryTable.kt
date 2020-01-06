@@ -11,6 +11,8 @@ import javafx.scene.control.TableColumn
 import javafx.scene.control.TableView
 import javafx.scene.control.TextField
 import javafx.scene.control.cell.PropertyValueFactory
+import javafx.scene.layout.Border
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import src.Mp3Metadata
@@ -50,7 +52,7 @@ class MusicFromDirectoryTable {
             return table
         }
 
-        fun init(model: Model) : VBox {
+        fun init(model: Model) : BorderPane {
             if (model.MusicMetadataList != null)
                 model.MusicMetadataList!!.clear()
 
@@ -62,7 +64,7 @@ class MusicFromDirectoryTable {
                 model.player.addNewMusic(Music("file:/" + newValue.Path.replace(" ", "%20").replace('\\', '/')))
             }
 
-            var vBox = VBox()
+            var pane = BorderPane()
             var hBox = HBox()
             var textField =  TextField()
             var searchButton = Button()
@@ -78,18 +80,18 @@ class MusicFromDirectoryTable {
                         newMusicMetaDataList.add(it)
                     }
                 }
-                vBox.children.remove(table)
                 table = createTable(newMusicMetaDataList)
                 table.selectionModel.selectedItemProperty().addListener { changed, oldValue, newValue ->
                     model.player.addNewMusic(Music("file:/" + newValue.Path.replace(" ", "%20").replace('\\', '/')))
                 }
-                vBox.children.add(table)
+                pane.center = table
             }
 
             hBox.children.addAll(textField, searchButton)
-            vBox.children.addAll(hBox, table)
+            pane.top = hBox
+            pane.center = table
 
-            return vBox
+            return pane
         }
     }
 }
