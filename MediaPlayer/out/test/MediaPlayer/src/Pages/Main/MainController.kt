@@ -10,14 +10,10 @@ import javafx.collections.ListChangeListener
 import javafx.scene.chart.XYChart
 import javafx.scene.media.AudioSpectrumListener
 import javafx.util.Duration
-import org.eclipse.fx.ui.controls.filesystem.DirectoryTreeView
-import org.eclipse.fx.ui.controls.filesystem.ResourceItem
 import java.nio.file.Paths
 import javafx.scene.control.SplitPane
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
-import org.eclipse.fx.ui.controls.filesystem.IconSize
-import org.eclipse.fx.ui.controls.filesystem.DirectoryView
 import src.UI.EqualizerHBox
 import src.UI.MusicInfoTextBox
 import src.UI.MusicFromDirectoryTable
@@ -192,41 +188,5 @@ class MainController : Model() {
     fun musicDBTableTurnOn(){
         mainBlock.children.clear()
         mainBlock.center = MusicFromDirectoryTable.init(this);
-    }
-
-    fun directoryTreeTurnOn(){ // TODO вынеси в UI
-        var rootDirItem = ResourceItem.createObservedPath(
-            Paths.get(settings.mainMusicDirectory.get())
-        )
-
-        val tv = DirectoryTreeView()
-        tv.iconSize = IconSize.SMALL
-        tv.rootDirectories = FXCollections.observableArrayList(rootDirItem)
-
-        val v = DirectoryView()
-        v.iconSize = IconSize.SMALL
-
-        tv.selectedItems.addListener { o: Observable ->
-            if (!tv.selectedItems.isEmpty()) {
-                v.dir = tv.selectedItems[0]
-            } else {
-                v.dir = null
-            }
-        }
-
-        v.selectedItems.addListener { change: ListChangeListener.Change<out ResourceItem>? ->
-            if(v.selectedItems.isNotEmpty()){
-                val uri = v.selectedItems[0].uri
-                var expansion =  uri.substringAfterLast('.')
-                if (expansion == "mp3" || expansion == "wav")
-                    addNewFile(uri)
-            }
-        }
-
-        val p = SplitPane(tv, v)
-        p.setDividerPositions(0.3, 0.8)
-
-        mainBlock.children.clear()
-        mainBlock.center = p;
     }
 }

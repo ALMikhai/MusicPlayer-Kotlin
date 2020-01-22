@@ -58,7 +58,6 @@
                             <MenuItem mnemonicParsing="false" onAction="#spectrumPageTurnOn" text="Spectrum" />
                               <MenuItem mnemonicParsing="false" onAction="#musicDBTableTurnOn" text="DataBase" />
                               <MenuItem mnemonicParsing="false" onAction="#lyricsPageTurnOn" text="Lyrics" />
-                              <MenuItem mnemonicParsing="false" onAction="#directoryTreeTurnOn" text="Directory" />
                           </items>
                         </MenuButton>
                      </children>

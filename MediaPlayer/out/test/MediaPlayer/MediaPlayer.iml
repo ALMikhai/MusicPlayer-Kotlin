@@ -409,7 +409,6 @@
         <jarDirectory url="jar://$MODULE_DIR$/src/EclipseFX/content.jar!/" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="library" exported="" name="at.bestsolution.efxclipse.ide:org.eclipse.fx.ide.l10n:2.4.0" level="project" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
